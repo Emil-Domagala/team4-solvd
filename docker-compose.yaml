@@ -1,0 +1,51 @@
+services:
+  app:
+    build: .
+    container_name: team4
+    ports:
+      - '3000:3000'
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://${DB_USERNAME:-admin}:${DB_PASSWORD:-password}@postgres:5432/${DB_NAME:-mainDB}
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      - postgres
+      - redis
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USERNAME:-admin}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+      POSTGRES_DB: ${DB_NAME:-mainDB}
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${DB_USERNAME_ADMIN:-admin@example.com}
+      PGADMIN_DEFAULT_PASSWORD: ${DB_PASSWORD_ADMIN:-adminpassword}
+    ports:
+      - '5050:80'
+    depends_on:
+      - postgres
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    volumes:
+      - redisdata:/data
+
+volumes:
+  pgdata:
+  redisdata:

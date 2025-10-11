@@ -1,4 +1,4 @@
-import { CustomError } from './cutomError.error';
+import { CustomError } from './cutom.error';
 
 /**
  * Error thrown when a required configuration or environment variable is missing or invalid.

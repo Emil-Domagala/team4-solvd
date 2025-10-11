@@ -1,8 +1,8 @@
 import { PipeTransform, Injectable } from '@nestjs/common';
 import { ZodType } from 'zod';
 
-import { MethodArgumentNotValidError } from '../errors/methodArgumentNotValidError.error';
-import { ErrorsArr } from '../errors/cutomError.error';
+import { MethodArgumentNotValidError } from '../errors/methodArgumentNotValid.error';
+import { ErrorsArr } from '../errors/cutom.error';
 
 /**
  * Pipe for validating request bodies against a Zod schema.

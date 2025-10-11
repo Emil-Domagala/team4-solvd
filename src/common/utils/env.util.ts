@@ -1,4 +1,4 @@
-import { ConfigError } from '../errors/configError.error';
+import { ConfigError } from '../errors/config.error';
 
 /**
  * Centralized utility for accessing environment variables safely.

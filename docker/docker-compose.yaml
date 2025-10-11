@@ -3,10 +3,12 @@ services:
     image: postgres:latest
     container_name: postgres
     restart: unless-stopped
+    env_file:
+      - ../.env
     environment:
-      POSTGRES_USER: ${DB_USERNAME:-admin}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
-      POSTGRES_DB: ${DB_NAME:-mainDB}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     ports:
       - '5432:5432'
     volumes:
@@ -17,6 +19,8 @@ services:
     image: dpage/pgadmin4:latest
     container_name: pgadmin
     restart: unless-stopped
+    env_file:
+      - ../.env
     environment:
       PGADMIN_DEFAULT_EMAIL: ${DB_USERNAME_ADMIN:-admin@example.com}
       PGADMIN_DEFAULT_PASSWORD: ${DB_PASSWORD_ADMIN:-adminpassword}
@@ -29,6 +33,8 @@ services:
     image: redis:latest
     container_name: redis
     restart: unless-stopped
+    env_file:
+      - ../.env
     ports:
       - '6379:6379'
     volumes:

@@ -1,4 +1,4 @@
-import { CustomError, ErrorsArr } from './cutomError.error';
+import { CustomError, ErrorsArr } from './cutom.error';
 
 /**
  * Error thrown when request validation fails due to invalid or missing arguments.

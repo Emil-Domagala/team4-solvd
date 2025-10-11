@@ -1,12 +1,11 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CacheModule } from '@nestjs/cache-manager';
 import * as redisStore from '@nestjs/cache-manager';
 import { AuthModule } from './features/auth/auth.module';
 import { UtilsModule } from './common/utils/utils.module';
+import { UserModule } from './features/user/user.module';
 
 @Module({
   imports: [
@@ -38,8 +37,9 @@ import { UtilsModule } from './common/utils/utils.module';
     }),
     AuthModule,
     UtilsModule,
+    UserModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}

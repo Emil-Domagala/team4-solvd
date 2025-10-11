@@ -1,18 +1,22 @@
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { CustomError } from './cutomError.error';
 
 /**
- * Error thrown when a required configuration or environment variable
- * is missing or invalid. Automatically results in a 500 response.
+ * Error thrown when a required configuration or environment variable is missing or invalid.
+ *
+ * Results in a **500 Internal Server Error** response.
  */
-export class ConfigError extends HttpException {
+export class ConfigError extends CustomError {
+  statusCode = 500;
+
   constructor(message: string) {
-    super(
-      {
-        status: HttpStatus.INTERNAL_SERVER_ERROR,
-        error: 'Configuration Error',
-        message,
-      },
-      HttpStatus.INTERNAL_SERVER_ERROR,
-    );
+    super(message);
+    Object.setPrototypeOf(this, ConfigError.prototype);
+  }
+
+  serializeErrors() {
+    return {
+      status: this.statusCode,
+      message: this.message,
+    };
   }
 }

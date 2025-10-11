@@ -1,17 +1,4 @@
 services:
-  app:
-    build: .
-    container_name: team4
-    ports:
-      - '3000:3000'
-    environment:
-      NODE_ENV: development
-      DATABASE_URL: postgresql://${DB_USERNAME:-admin}:${DB_PASSWORD:-password}@postgres:5432/${DB_NAME:-mainDB}
-      REDIS_URL: redis://redis:6379
-    depends_on:
-      - postgres
-      - redis
-
   postgres:
     image: postgres:latest
     container_name: postgres

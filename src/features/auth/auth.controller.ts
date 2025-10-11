@@ -1,33 +1,70 @@
-import { Controller, Post, Res } from '@nestjs/common';
+import { Body, Controller, Post, Req, Res } from '@nestjs/common';
+import type { Response, Request } from 'express';
+import { AuthService } from './auth.service';
 import { SessionManagerService } from './session/sessionManager.service';
 import { AuthCookieService } from './session/authCookie.service';
-import type { Response, Request } from 'express';
+import { ValidateBodyPipe } from 'src/common/utils/validateBody.pipe';
+import * as createUserDto from '../user/dto/createUser.dto';
+import { UserLoginError } from './error/userLogin.error';
+import { Env } from 'src/common/utils/env.util';
 
 @Controller('auth')
 export class AuthController {
   constructor(
+    private readonly authService: AuthService,
     private readonly sessionManager: SessionManagerService,
     private readonly authCookieService: AuthCookieService,
   ) {}
 
-  @Post('login')
-  async login(@Res({ passthrough: true }) res: Response) {
-    const sessionId = crypto.randomUUID();
-    await this.sessionManager.createSession(sessionId, {
-      userId: '123',
+  @Post('register')
+  async register(
+    @Body(new ValidateBodyPipe(createUserDto.CreateUserSchema))
+    dto: createUserDto.CreateUserDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const user = await this.authService.register(dto);
+
+    const sessionId = await this.sessionManager.createSession({
+      userId: user.id,
       createdAt: Date.now(),
     });
 
     this.authCookieService.setAuthSessionCookie(res, sessionId);
-    // TODO: Implement login logic, password checking etc
-    return { success: true };
+
+    return { success: true, userId: user.id };
   }
 
-  // TODO: implement this
-  //   @Post('logout')
-  //   async logout(@Res({ passthrough: true }) res: Response, @Req() req: Request) {
-  // const sessionId = req.cookies?.SESSION_ID;
-  // if (sessionId) await this.sessionManager.deleteSession(sessionId);
-  // this.authCookieService.clearAuthSessionCookie(res);
-  //   }
+  @Post('login')
+  async login(
+    @Body() body: { email: string; password: string },
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const user = await this.authService.validateUser(body.email, body.password);
+    if (!user) throw new UserLoginError();
+
+    const sessionId = await this.sessionManager.createSession({
+      userId: user.id,
+      createdAt: Date.now(),
+    });
+
+    this.authCookieService.setAuthSessionCookie(res, sessionId);
+
+    return { userId: user.id };
+  }
+
+  @Post('logout')
+  async logout(@Res({ passthrough: true }) res: Response, @Req() req: Request) {
+    // Read session token from the auth cookie
+    const sessionId = req.cookies[Env.getString('AUTH_SESSION_COOKIE_NAME')] as
+      | string
+      | undefined;
+
+    if (sessionId) {
+      await this.sessionManager.deleteSession(sessionId);
+    }
+
+    // Clear the auth cookie
+    this.authCookieService.clearAuthSessionCookie(res);
+    return { success: true };
+  }
 }

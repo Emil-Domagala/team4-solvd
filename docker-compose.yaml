@@ -3,8 +3,6 @@ services:
     image: postgres:latest
     container_name: postgres
     restart: unless-stopped
-    env_file:
-      - ../.env
     environment:
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -20,7 +18,7 @@ services:
     container_name: pgadmin
     restart: unless-stopped
     env_file:
-      - ../.env
+      - ./.env
     environment:
       PGADMIN_DEFAULT_EMAIL: ${DB_USERNAME_ADMIN:-admin@example.com}
       PGADMIN_DEFAULT_PASSWORD: ${DB_PASSWORD_ADMIN:-adminpassword}
@@ -34,11 +32,24 @@ services:
     container_name: redis
     restart: unless-stopped
     env_file:
-      - ../.env
+      - ./.env
     ports:
       - '6379:6379'
     volumes:
       - redisdata:/data
+
+  app:
+    build: .
+    container_name: app
+    restart: always
+    env_file:
+      - ./.env
+    depends_on:
+      - postgres
+      - redis
+    ports:
+      - '3000:3000'
+    command: npm run start:dev
 
 volumes:
   pgdata:

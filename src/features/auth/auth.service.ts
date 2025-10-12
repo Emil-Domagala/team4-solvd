@@ -12,7 +12,7 @@ export class AuthService {
     private readonly passwordService: PasswordService,
   ) {}
 
-  register = async (dto: CreateUserDto) => {
+  register = async (dto: CreateUserDto): Promise<UserEntity> => {
     const existingUser = await this.userRepository.findByEmail(dto.email);
     if (existingUser) throw new EmailIsAlreadyTakenError();
 

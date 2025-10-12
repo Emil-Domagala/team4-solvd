@@ -6,6 +6,7 @@ import * as redisStore from '@nestjs/cache-manager';
 import { AuthModule } from './features/auth/auth.module';
 import { UtilsModule } from './common/utils/utils.module';
 import { UserModule } from './features/user/user.module';
+import { AuthUtilsModule } from './common/session/authUtils.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { UserModule } from './features/user/user.module';
     AuthModule,
     UtilsModule,
     UserModule,
+    AuthUtilsModule,
   ],
   controllers: [],
   providers: [],

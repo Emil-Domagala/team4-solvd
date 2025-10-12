@@ -1,4 +1,3 @@
-// src/common/filters/custom-exception.filter.ts
 import {
   ExceptionFilter,
   Catch,
@@ -34,9 +33,9 @@ export class CustomExceptionFilter implements ExceptionFilter {
       const res = exception.getResponse();
       return response.status(status).json({
         statusCode: status,
-        ...(typeof res === 'string' ? { message: res } : res),
         timestamp: new Date().toISOString(),
         path: request.url,
+        ...(typeof res === 'string' ? { message: res } : res),
       });
     }
 

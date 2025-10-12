@@ -6,7 +6,10 @@ export class RedisService {
   constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
 
   async set(key: string, value: any, ttlSeconds: number): Promise<void> {
-    await this.cacheManager.set(key, JSON.stringify(value), ttlSeconds);
+    //@ts-expect-error it works like that
+    await this.cacheManager.set(key, JSON.stringify(value), {
+      ttl: ttlSeconds,
+    });
   }
 
   async get<T = any>(key: string): Promise<T | null> {

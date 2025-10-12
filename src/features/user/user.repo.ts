@@ -29,4 +29,7 @@ export class UserRepository {
   async findByEmail(email: string): Promise<UserEntity | null> {
     return this.repo.findOneBy({ email });
   }
+  async findById(id: string): Promise<UserEntity | null> {
+    return await this.repo.findOneBy({ id });
+  }
 }

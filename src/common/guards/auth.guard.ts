@@ -22,20 +22,15 @@ export class AuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest<AuthRequest>();
-    console.log(req.cookies);
     const token = req.cookies[
       Env.getString('AUTH_SESSION_COOKIE_NAME')
     ] as string;
-
-    console.log('token: ', token);
 
     if (!token) throw new SessionInvalidError();
 
     try {
       const sessionData =
         await this.sessionManager.verifyAndExtendSession(token);
-
-      console.log(sessionData);
 
       req.user = sessionData;
 

@@ -33,4 +33,5 @@ async function bootstrap() {
   app.use(cookieParser());
   await app.listen(Env.getOptionalNumber('PORT', 3000));
 }
+
 bootstrap();

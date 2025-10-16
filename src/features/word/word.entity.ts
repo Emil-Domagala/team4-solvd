@@ -4,7 +4,7 @@ import {
   UpdateDateColumn,
   Entity,
   PrimaryGeneratedColumn,
-  Unique
+  Unique,
 } from 'typeorm';
 
 export enum WordCategory {
@@ -12,13 +12,13 @@ export enum WordCategory {
   SPORTS = 'sports',
   SCIENCE = 'science',
   ENTERTAINMENT = 'entertainment',
-  HISTORY = 'history'
+  HISTORY = 'history',
 }
 
 export enum WordDifficulty {
   EASY = 'easy',
   MEDIUM = 'medium',
-  HARD = 'hard'
+  HARD = 'hard',
 }
 
 @Entity('words')
@@ -33,9 +33,13 @@ export class WordEntity {
   @Column({ type: 'enum', enum: WordCategory, default: WordCategory.GENERAL })
   category: WordCategory;
 
-  @Column({ type: 'enum', enum: WordDifficulty, default: WordDifficulty.MEDIUM })
+  @Column({
+    type: 'enum',
+    enum: WordDifficulty,
+    default: WordDifficulty.MEDIUM,
+  })
   difficulty: WordDifficulty;
-  
+
   @CreateDateColumn()
   createdAt: Date;
 

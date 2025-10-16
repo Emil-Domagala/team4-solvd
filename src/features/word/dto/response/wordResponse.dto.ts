@@ -19,7 +19,7 @@ export class WordResponseDto {
   @Expose()
   @ApiProperty({ enum: WordDifficulty })
   readonly difficulty: WordDifficulty;
-  
+
   @Expose()
   @ApiProperty()
   readonly createdAt: Date;
@@ -28,12 +28,7 @@ export class WordResponseDto {
   @ApiProperty()
   readonly updatedAt: Date;
 
-  constructor(word: WordEntity) {
-    this.id = word.id;
-    this.value = word.value;
-    this.category = word.category;
-    this.difficulty = word.difficulty;
-    this.createdAt = word.createdAt;
-    this.updatedAt = word.updatedAt;
+  constructor(partial: Partial<WordEntity>) {
+    Object.assign(this, partial);
   }
 }

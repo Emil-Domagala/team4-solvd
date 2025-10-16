@@ -1,73 +1,69 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { WordEntity } from './word.entity';
 import { WordRepository } from './word.repo';
 import { CreateWordDto } from './dto/createWord.dto';
 import { UpdateWordDto } from './dto/updateWord.dto';
 import { EntityNotFoundError } from 'src/common/errors/entityNotFound.error';
-
-interface PaginationOptions {
-  page?: number;
-  limit?: number;
-}
-
-export interface PaginationMeta {
-  total: number;
-  count: number;
-  limit: number;
-  totalPages: number;
-  currentPage: number;
-  date: Date;
-}
-
-export interface PaginationResult<T> {
-  data: T[];
-  meta: PaginationMeta;
-}
+import { PaginationResultDto } from 'src/common/pagination/dto/paginationResult.dto';
+import { PaginationService } from 'src/common/pagination/pagination.service';
+import { plainToInstance } from 'class-transformer';
+import { WordFilterDto } from './dto/wordFilter.dto';
 
 @Injectable()
 export class WordService {
-  constructor(private readonly wordRepo: WordRepository) {}
+  constructor(
+    private readonly wordRepo: WordRepository,
+    private readonly paginationService: PaginationService,
+  ) {}
 
-  findAll = async (options?: PaginationOptions): Promise<PaginationResult<WordEntity>> => {
-    const page = options?.page || 1;
-    const limit = options?.limit || 20;
-    const [words, total] = await this.wordRepo.findAll(page, limit);
+  async findAllByFilters(
+    filters: WordFilterDto,
+  ): Promise<PaginationResultDto<WordEntity, WordFilterDto>> {
+    const query = this.wordRepo.getQueryBuilder();
 
-    const meta: PaginationMeta = {
-      total,
-      count: words.length,
-      limit: limit,
-      totalPages: Math.ceil(total / limit),
-      currentPage: page,
-      date: new Date(),
-    };
+    // Filtering
+    if (filters.category) {
+      query.andWhere('word.category = :category', {
+        category: filters.category,
+      });
+    }
 
-    return { data: words, meta };
+    if (filters.difficulty) {
+      query.andWhere('word.difficulty = :difficulty', {
+        difficulty: filters.difficulty,
+      });
+    }
+
+    if (filters.search) {
+      query.andWhere('word.value ILIKE :search', {
+        search: `%${filters.search}%`,
+      });
+    }
+
+    return this.paginationService.paginate(query, filters, '/words');
   }
 
-  findOne = async (id: string): Promise<WordEntity> => {
-    const word = await this.wordRepo.findOne(id);
+  async findOneById(id: string): Promise<WordEntity> {
+    const word = await this.wordRepo.findById(id);
     if (!word) throw new EntityNotFoundError('Word');
     return word;
   }
 
-  create = async (dto: CreateWordDto): Promise<WordEntity> => {
-    const newWord = await this.wordRepo.create(dto);
+  async create(dto: CreateWordDto): Promise<WordEntity> {
+    const newWord = this.wordRepo.create(dto);
     return this.wordRepo.save(newWord);
   }
 
-  update = async (id: string, dto: UpdateWordDto): Promise<WordEntity> => {
-    const word = await this.findOne(id);
-    Object.entries(dto).forEach(([key, value]) => {
-      if (value != null) (word as any)[key] = value;
-    });
-    return await this.wordRepo.save(word);
+  async update(id: string, dto: UpdateWordDto): Promise<WordEntity> {
+    const word = await this.findOneById(id);
+    const updated = plainToInstance(WordEntity, { ...word, ...dto });
+    return this.wordRepo.save(updated);
   }
 
-  remove = async (id: string): Promise<WordEntity | null> => {
-    const word = await this.wordRepo.findOne(id);
-    if (word) await this.wordRepo.delete(id);
+  async remove(id: string): Promise<WordEntity | null> {
+    const word = await this.wordRepo.findById(id);
+    if (!word) return null;
+    await this.wordRepo.delete(id);
     return word;
   }
 }

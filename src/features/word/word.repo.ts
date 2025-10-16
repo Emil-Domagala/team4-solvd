@@ -8,8 +8,12 @@ import { CreateWordDto } from './dto/createWord.dto';
 export class WordRepository {
   constructor(
     @InjectRepository(WordEntity)
-    private readonly repo: Repository<WordEntity>
+    private readonly repo: Repository<WordEntity>,
   ) {}
+
+  getQueryBuilder() {
+    return this.repo.createQueryBuilder('word');
+  }
 
   async findAll(page = 1, limit = 20) {
     return await this.repo.findAndCount({
@@ -18,11 +22,11 @@ export class WordRepository {
     });
   }
 
-  async findOne(id: string) {
+  async findById(id: string) {
     return await this.repo.findOne({ where: { id } });
   }
 
-  async create(dto: CreateWordDto) {
+  create(dto: CreateWordDto) {
     return this.repo.create(dto);
   }
 

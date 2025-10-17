@@ -1,3 +1,6 @@
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Env } from './common/utils/env.util';
@@ -34,4 +37,7 @@ async function bootstrap() {
   await app.listen(Env.getOptionalNumber('PORT', 3000));
 }
 
-bootstrap();
+bootstrap().catch((err) => {
+  console.error('Bootstrap failed:', err);
+  process.exit(1);
+});

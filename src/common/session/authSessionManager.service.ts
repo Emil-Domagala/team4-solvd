@@ -21,7 +21,7 @@ export class AuthSessionManagerService {
 
   async createSession(data: UserEntity, ttlSeconds?: number): Promise<string> {
     const sessionId = crypto.randomUUID();
-    await this.redisService.set(
+    await this.redisService.set<SessionData>(
       sessionId,
       { userId: data.id, email: data.email, sesionCreatedAt: new Date() },
       ttlSeconds ?? this.DEFAULT_TTL,

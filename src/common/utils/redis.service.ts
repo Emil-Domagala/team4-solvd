@@ -1,24 +1,23 @@
-import { Injectable, Inject } from '@nestjs/common';
-import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
+import Redis from 'ioredis';
+import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { Env } from './env.util';
 
 @Injectable()
-export class RedisService {
-  constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
+export class RedisService implements OnModuleInit, OnModuleDestroy {
+  private client: Redis;
 
-  async set<T>(key: string, value: T, ttlSeconds: number): Promise<void> {
-    //@ts-expect-error it works like that
-    await this.cacheManager.set(key, JSON.stringify(value), {
-      ttl: ttlSeconds,
+  onModuleInit() {
+    this.client = new Redis({
+      host: Env.getString('REDIS_HOST'),
+      port: Env.getNumber('REDIS_PORT'),
     });
   }
 
-  async get<T>(key: string): Promise<T | null> {
-    const data = await this.cacheManager.get<string>(key);
-    if (!data) return null;
-    return JSON.parse(data) as T;
+  onModuleDestroy() {
+    this.client.quit();
   }
 
-  async del(key: string): Promise<void> {
-    await this.cacheManager.del(key);
+  getClient() {
+    return this.client;
   }
 }

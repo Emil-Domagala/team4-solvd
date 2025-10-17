@@ -7,6 +7,7 @@ import { AuthModule } from './features/auth/auth.module';
 import { UserModule } from './features/user/user.module';
 import { WordModule } from './features/word/word.module';
 import { CommonModule } from './common/common.module';
+import { RoomModule } from './features/room/room.module';
 
 @Module({
   imports: [
@@ -25,21 +26,11 @@ import { CommonModule } from './common/common.module';
         synchronize: true,
       }),
     }),
-    CacheModule.registerAsync({
-      isGlobal: true,
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        store: redisStore,
-        host: configService.get<string>('REDIS_HOST', 'localhost'),
-        port: configService.get<number>('REDIS_PORT', 6379),
-        ttl: configService.get<number>('CACHE_TTL', 60),
-      }),
-    }),
     CommonModule,
     AuthModule,
     UserModule,
     WordModule,
+    RoomModule,
   ],
   controllers: [],
   providers: [],

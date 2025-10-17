@@ -9,6 +9,6 @@ import { WordController } from './word.controller';
   imports: [TypeOrmModule.forFeature([WordEntity])],
   controllers: [WordController],
   providers: [WordRepository, WordService],
-  exports: [WordRepository, WordService]
+  exports: [WordRepository, WordService],
 })
 export class WordModule {}

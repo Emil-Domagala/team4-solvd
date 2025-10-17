@@ -1,4 +1,4 @@
-import { CustomError } from './cutom.error';
+import { CustomError } from './custom.error';
 
 /**
  * Error thrown when entity not found

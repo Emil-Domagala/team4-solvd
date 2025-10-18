@@ -4,12 +4,15 @@ import {
   ArgumentsHost,
   HttpStatus,
   HttpException,
+  Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { CustomError } from '../errors/cutom.error';
+import { CustomError } from '../errors/custom.error';
 
 @Catch()
 export class CustomExceptionFilter implements ExceptionFilter {
+  private readonly logger = new Logger(CustomExceptionFilter.name);
+
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
@@ -40,7 +43,7 @@ export class CustomExceptionFilter implements ExceptionFilter {
     }
 
     // Fallback for unexpected errors
-    console.error('Unexpected error', exception);
+    this.logger.error('Unexpected error occurred', exception);
     return response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
       message: 'Internal server error',

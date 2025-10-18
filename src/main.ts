@@ -1,8 +1,15 @@
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 import { NestFactory, Reflector } from '@nestjs/core';
+import {
+  Logger,
+  ClassSerializerInterceptor,
+  ValidationPipe,
+} from '@nestjs/common';
 import { AppModule } from './app.module';
 import { Env } from './common/utils/env.util';
 import cookieParser from 'cookie-parser';
-import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { CustomExceptionFilter } from './common/filters/customException.filter';
 
@@ -34,4 +41,8 @@ async function bootstrap() {
   await app.listen(Env.getOptionalNumber('PORT', 3000));
 }
 
-bootstrap();
+bootstrap().catch((err) => {
+  const logger = new Logger('Bootstrap');
+  logger.error('Bootstrap failed:', err);
+  process.exit(1);
+});

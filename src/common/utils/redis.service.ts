@@ -5,14 +5,14 @@ import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 export class RedisService {
   constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
 
-  async set(key: string, value: any, ttlSeconds: number): Promise<void> {
+  async set<T>(key: string, value: T, ttlSeconds: number): Promise<void> {
     //@ts-expect-error it works like that
     await this.cacheManager.set(key, JSON.stringify(value), {
       ttl: ttlSeconds,
     });
   }
 
-  async get<T = any>(key: string): Promise<T | null> {
+  async get<T>(key: string): Promise<T | null> {
     const data = await this.cacheManager.get<string>(key);
     if (!data) return null;
     return JSON.parse(data) as T;

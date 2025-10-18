@@ -1,4 +1,4 @@
-import { CustomError } from './cutom.error';
+import { CustomError } from './custom.error';
 
 /*
  * Custom error used when session is invalid. returns 401

@@ -1,4 +1,4 @@
-import { CustomError } from 'src/common/errors/cutom.error';
+import { CustomError } from 'src/common/errors/custom.error';
 
 /**
  * Error thrown when email is already taken

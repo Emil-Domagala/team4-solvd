@@ -11,51 +11,68 @@ export type SessionData = {
 };
 
 @Injectable()
-export class AuthSessionManagerService {
+export class AuthSessionManagerService extends RedisService {
   private readonly logger = new Logger(AuthSessionManagerService.name);
+  private readonly SESSION_PREFIX = 'session:';
   private readonly DEFAULT_TTL = Env.getOptionalNumber(
     'AUTH_SESSION_TTL_SEC',
     3600,
   );
 
-  constructor(private readonly redisService: RedisService) {}
+  private getSessionKey(sessionId: string) {
+    return `${this.SESSION_PREFIX}${sessionId}`;
+  }
 
   async createSession(data: UserEntity, ttlSeconds?: number): Promise<string> {
     const sessionId = crypto.randomUUID();
-    await this.redisService.set<SessionData>(
-      sessionId,
-      { userId: data.id, email: data.email, sessionCreatedAt: new Date() },
+    const key = this.getSessionKey(sessionId);
+    const value: SessionData = {
+      userId: data.id,
+      email: data.email,
+      sessionCreatedAt: new Date(),
+    };
+
+    await this.getClient().set(
+      key,
+      JSON.stringify(value),
+      'EX',
       ttlSeconds ?? this.DEFAULT_TTL,
     );
     return sessionId;
   }
 
   async getSession(sessionId: string): Promise<SessionData | null> {
-    return this.redisService.get<SessionData>(sessionId);
+    const json = await this.getClient().get(this.getSessionKey(sessionId));
+    if (!json) return null;
+
+    try {
+      return JSON.parse(json) as SessionData;
+    } catch (err) {
+      this.logger.debug('Error parsing session JSON', err);
+      return null;
+    }
   }
 
   async deleteSession(sessionId: string): Promise<void> {
-    await this.redisService.del(sessionId);
+    await this.getClient().del(this.getSessionKey(sessionId));
   }
 
   async extendSession(
     sessionId: string,
     additionalTTL?: number,
   ): Promise<void> {
+    const key = this.getSessionKey(sessionId);
     const session = await this.getSession(sessionId);
     if (session) {
-      await this.redisService.set(
-        sessionId,
-        { ...session },
+      await this.getClient().set(
+        key,
+        JSON.stringify(session),
+        'EX',
         additionalTTL ?? this.DEFAULT_TTL,
       );
     }
   }
 
-  /**
-   * Verify session exists and extend TTL automatically.
-   * Throws UnauthorizedException if session is invalid.
-   */
   async verifyAndExtendSession(sessionId: string): Promise<SessionData> {
     const session = await this.getSession(sessionId);
     if (!session) throw new UnauthorizedException('Invalid session');
@@ -64,3 +81,4 @@ export class AuthSessionManagerService {
     return session;
   }
 }
+

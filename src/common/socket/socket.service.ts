@@ -11,11 +11,10 @@ import { Server, Socket } from 'socket.io';
 export class SocketService<
   ServerToClientEvents extends Record<string, (...args: any[]) => void> = any,
 > {
-  private readonly logger = new Logger(SocketService.name);
-
   protected server: Server<any, ServerToClientEvents>;
   private clients: Map<string, Socket<any, ServerToClientEvents>> = new Map();
   private userSockets: Map<string, Set<string>> = new Map(); // only for private messaging
+  protected readonly logger = new Logger(SocketService.name);
 
   /** Set the Socket.IO server instance */
   setServer(server: Server<any, ServerToClientEvents>) {
@@ -123,3 +122,4 @@ export class SocketService<
       .emit(event, ...(args as any));
   }
 }
+

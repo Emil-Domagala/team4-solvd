@@ -11,18 +11,23 @@ import {
   UseGuards,
   Query,
 } from '@nestjs/common';
-import { WordService } from './word.service';
-import { CreateWordDto } from './dto/createWord.dto';
-import { UpdateWordDto } from './dto/updateWord.dto';
-import { WordResponseDto } from './dto/response/wordResponse.dto';
+import { WordAdminService } from './word.admin.service';
+import { CreateWordDto } from '../dto/createWord.dto';
+import { UpdateWordDto } from '../dto/updateWord.dto';
+import { WordResponseDto } from '../dto/response/wordResponse.dto';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { PaginationResultDto } from 'src/common/pagination/dto/paginationResult.dto';
-import { WordFilterDto } from './dto/wordFilter.dto';
+import { WordFilterDto } from '../dto/wordFilter.dto';
+import { RolesGuard } from 'src/common/guards/roles.guard';
+import { RoleEnum } from 'src/features/user/role/role.enum';
+import { Roles } from 'src/common/decorators/roles.decorator';
 
-@ApiTags('word')
-@Controller('words')
-export class WordController {
-  constructor(private readonly wordService: WordService) {}
+@ApiTags('word-admin')
+@Controller('admin/words')
+@UseGuards(AuthGuard, RolesGuard)
+@Roles(RoleEnum.ADMIN)
+export class WordAdminController {
+  constructor(private readonly wordService: WordAdminService) {}
 
   @Get()
   @ApiOperation({ summary: 'Get all words with filters and pagination' })
@@ -54,7 +59,6 @@ export class WordController {
   }
 
   @Post()
-  @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Create a word' })
   @ApiResponse({
     status: 201,
@@ -67,7 +71,6 @@ export class WordController {
   }
 
   @Patch(':id')
-  @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Update an existing word' })
   @ApiResponse({
     status: 200,
@@ -83,7 +86,6 @@ export class WordController {
   }
 
   @Delete(':id')
-  @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Delete a word' })
   @ApiResponse({
     status: 200,

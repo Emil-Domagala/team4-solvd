@@ -1,12 +1,16 @@
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import crypto from 'crypto';
 import { Env } from 'src/common/utils/env.util';
 import { RedisService } from 'src/common/utils/redis.service';
-import crypto from 'crypto';
 import { UserEntity } from 'src/features/user/user.entity';
 
 export type SessionData = {
   userId: string;
   email: string;
+  role: {
+    name: string;
+    priority: number;
+  };
   sessionCreatedAt: Date;
 };
 
@@ -29,6 +33,10 @@ export class AuthSessionManagerService extends RedisService {
     const value: SessionData = {
       userId: data.id,
       email: data.email,
+      role: {
+        name: data.role.name,
+        priority: data.role.priority,
+      },
       sessionCreatedAt: new Date(),
     };
 

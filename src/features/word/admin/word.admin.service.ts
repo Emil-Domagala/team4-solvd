@@ -1,18 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { WordEntity } from './word.entity';
-import { WordRepository } from './word.repo';
-import { CreateWordDto } from './dto/createWord.dto';
-import { UpdateWordDto } from './dto/updateWord.dto';
+import { WordEntity } from '../word.entity';
+import { CreateWordDto } from '../dto/createWord.dto';
+import { UpdateWordDto } from '../dto/updateWord.dto';
 import { EntityNotFoundError } from 'src/common/errors/entityNotFound.error';
 import { PaginationResultDto } from 'src/common/pagination/dto/paginationResult.dto';
 import { PaginationService } from 'src/common/pagination/pagination.service';
 import { plainToInstance } from 'class-transformer';
-import { WordFilterDto } from './dto/wordFilter.dto';
+import { WordFilterDto } from '../dto/wordFilter.dto';
+import { WordAdminRepository } from './word.admin.repo';
 
 @Injectable()
-export class WordService {
+export class WordAdminService {
   constructor(
-    private readonly wordRepo: WordRepository,
+    private readonly wordRepo: WordAdminRepository,
     private readonly paginationService: PaginationService,
   ) {}
 

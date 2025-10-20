@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { WordEntity } from './word.entity';
-import { CreateWordDto } from './dto/createWord.dto';
+import { WordEntity } from '../word.entity';
+import { CreateWordDto } from '../dto/createWord.dto';
 
 @Injectable()
-export class WordRepository {
+export class WordAdminRepository {
   constructor(
     @InjectRepository(WordEntity)
     private readonly repo: Repository<WordEntity>,

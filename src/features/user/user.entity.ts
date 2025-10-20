@@ -5,7 +5,9 @@ import {
   PrimaryGeneratedColumn,
   Unique,
   UpdateDateColumn,
+  ManyToOne,
 } from 'typeorm';
+import { RoleEntity } from './role/role.entity';
 
 @Entity('users')
 @Unique(['email'])
@@ -21,6 +23,9 @@ export class UserEntity {
 
   @Column({ type: 'varchar', length: 255 })
   password: string;
+
+  @ManyToOne(() => RoleEntity, role => role.users, { eager: true })
+  role: RoleEntity;
 
   @CreateDateColumn()
   createdAt: Date;

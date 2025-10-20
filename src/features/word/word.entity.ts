@@ -25,7 +25,7 @@ export enum WordDifficulty {
 @Unique(['value'])
 export class WordEntity {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  readonly id: string;
 
   @Column({ unique: true, type: 'varchar', length: 255 })
   value: string;
@@ -41,7 +41,7 @@ export class WordEntity {
   difficulty: WordDifficulty;
 
   @CreateDateColumn()
-  createdAt: Date;
+  readonly createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;

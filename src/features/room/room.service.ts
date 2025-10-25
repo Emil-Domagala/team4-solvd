@@ -43,6 +43,9 @@ export class RoomService {
       throw new Error('TODO: Room is not waiting');
 
     room.addPlayer(playerId);
+    if (room.getPlayerIds().length === room.getRoomConfig().maxPlayers) {
+      room.lockRoom();
+    }
     await this.redis.saveRoom(room);
     const dto = this.toDto(room);
     this.socketService.emitToRoom(roomId, RoomEvent.JOINED, {
@@ -59,11 +62,12 @@ export class RoomService {
     if (!room) return null;
     room.removePlayer(playerId);
 
+    if (room.getStatus() === 'locked') {
+      room.unlockRoom();
+    }
+
     if (room.getPlayerIds().length === 0) {
-      await this.redis.deleteRoom(roomId);
-      const dto = this.toDto(room);
-      this.socketService.emitToAll(RoomEvent.DELETED, { room: dto, playerId });
-      this.logger.log(`Room ${roomId} deleted`);
+      await this.deleteRoomInternal(room);
       return null;
     }
 
@@ -77,6 +81,25 @@ export class RoomService {
     return dto;
   }
 
+  /** Delete room */
+  async deleteRoom(roomId: string, playerId: string): Promise<void> {
+    const room = await this.redis.getRoom(roomId);
+    if (!room) throw new EntityNotFoundError(`Room`);
+    if (room.getHostId() !== playerId)
+      throw new Error('Only the host can delete this room');
+    if (room.getStatus() !== 'waiting')
+      throw new Error('TODO: Room is not waiting');
+    await this.deleteRoomInternal(room);
+  }
+
+  /* Helper method to delete room. IT DO NOT REQUIRE AUTH */
+  private async deleteRoomInternal(roomEntity: RoomEntity): Promise<void> {
+    await this.redis.deleteRoom(roomEntity.getId());
+    const dto = this.toDto(roomEntity);
+    this.socketService.emitToAll(RoomEvent.DELETED, { room: dto });
+    this.logger.log(`Room ${roomEntity.getId()} deleted`);
+  }
+
   /** Start the room (game/session/etc.) */
   async startRoom(room: RoomEntity): Promise<RoomDto> {
     room.startGame();
@@ -84,15 +107,6 @@ export class RoomService {
     const dto = this.toDto(room);
     this.socketService.emitToRoom(room.getId(), RoomEvent.STARTED, dto);
     return dto;
-  }
-
-  /** End the room */
-  async endRoom(room: RoomEntity): Promise<void> {
-    if (!room) return;
-    room.endGame();
-    await this.redis.deleteRoom(room.getId());
-    const dto = this.toDto(room);
-    this.socketService.emitToRoom(room.getId(), RoomEvent.ENDED, { room: dto });
   }
 
   /** Returns all active rooms */

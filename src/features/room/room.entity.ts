@@ -14,40 +14,40 @@ import {
 import { Type } from 'class-transformer';
 import { RoomConfig } from './domains/roomConfig.dto';
 
-export type RoomStatus = 'waiting' | 'playing' | 'ended';
+export type RoomStatus = 'waiting' | 'playing' | 'ended' | 'locked';
 
 export class RoomEntity {
   @IsUUID()
-  readonly id: string;
+  private readonly id: string;
 
   @IsUUID()
-  readonly hostId: string;
+  private readonly hostId: string;
 
   @IsString()
   @MinLength(1)
   @MaxLength(100)
-  name: string;
+  private name: string;
 
   @ValidateNested()
   @Type(() => RoomConfig)
-  readonly roomConfig: RoomConfig;
+  private readonly roomConfig: RoomConfig;
 
   @IsArray()
   @IsUUID('4', { each: true })
-  playerIds: string[] = [];
+  private playerIds: string[] = [];
 
   @IsArray()
   @IsUUID('4', { each: true })
-  teamIds: string[] = [];
+  private teamIds: string[] = [];
 
-  @IsEnum(['waiting', 'playing', 'ended'])
-  status: RoomStatus = 'waiting';
-
-  @IsDate()
-  readonly createdAt: Date;
+  @IsEnum(['waiting', 'playing', 'ended', 'locked'])
+  private status: RoomStatus = 'waiting';
 
   @IsDate()
-  updatedAt: Date;
+  private readonly createdAt: Date;
+
+  @IsDate()
+  private updatedAt: Date;
 
   constructor(name: string, hostId: string, roomConfig: RoomConfig) {
     this.id = crypto.randomUUID();
@@ -156,6 +156,24 @@ export class RoomEntity {
     this.status = 'ended';
     this.touch();
   }
+
+  lockRoom(): void {
+    if (this.status !== 'waiting') {
+      throw new Error(`Cannot lock room when status is ${this.status}`);
+    }
+    this.status = 'locked';
+    this.touch();
+  }
+
+  unlockRoom(): void {
+    if (this.status !== 'locked') {
+      throw new Error(`Cannot unlock room when status is ${this.status}`);
+    }
+    this.status = 'waiting';
+    this.touch();
+  }
+
+  // --- Helpers ---
 
   private touch(): void {
     this.updatedAt = new Date();

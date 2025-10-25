@@ -34,23 +34,25 @@ export class RoomGateway extends BaseGateway {
     @ConnectedSocket() client: Socket,
     @MessageBody() dto: CreateRoomDto,
   ) {
-    try {
-      const room = await this.roomService.createRoom(
-        dto.hostId,
-        dto.roomName,
-        dto.roomConfig,
-      );
+    const room = await this.roomService.createRoom(
+      dto.hostId,
+      dto.roomName,
+      dto.roomConfig,
+    );
 
-      await client.join(room.id);
+    await client.join(room.id);
 
-      this.logger.log(`Room created: ${room.id}`);
-    } catch (error) {
-      this.socketService.emitToClient(
-        client.id,
-        RoomEvent.ERROR,
-        (error as Error).message,
-      );
-    }
+    this.logger.log(`Room created: ${room.id}`);
+  }
+
+  // ------------------ DELETE ROOM ------------------
+  @SubscribeMessage(RoomEvent.DELETED)
+  async deleteRoom(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { roomId: string; playerId: string },
+  ) {
+    await this.roomService.deleteRoom(data.roomId, data.playerId);
+    this.logger.log(`Room ${data.roomId} deleted`);
   }
 
   // ------------------ JOIN ROOM ------------------
@@ -59,19 +61,11 @@ export class RoomGateway extends BaseGateway {
     @ConnectedSocket() client: Socket,
     @MessageBody() data: { roomId: string; playerId: string },
   ) {
-    try {
-      await this.roomService.joinToRoom(data.roomId, data.playerId);
+    await this.roomService.joinToRoom(data.roomId, data.playerId);
 
-      await client.join(data.roomId);
+    await client.join(data.roomId);
 
-      this.logger.log(`Player ${data.playerId} joined room ${data.roomId}`);
-    } catch (error) {
-      this.socketService.emitToClient(
-        client.id,
-        RoomEvent.ERROR,
-        (error as Error).message,
-      );
-    }
+    this.logger.log(`Player ${data.playerId} joined room ${data.roomId}`);
   }
 
   // ------------------ LEAVE ROOM ------------------
@@ -80,19 +74,11 @@ export class RoomGateway extends BaseGateway {
     @ConnectedSocket() client: Socket,
     @MessageBody() data: { roomId: string; playerId: string },
   ) {
-    try {
-      const room = await this.roomService.leaveRoom(data.roomId, data.playerId);
-      if (!room) return;
+    const room = await this.roomService.leaveRoom(data.roomId, data.playerId);
+    if (!room) return;
 
-      await client.leave(data.roomId);
+    await client.leave(data.roomId);
 
-      this.logger.log(`Player ${data.playerId} left room ${data.roomId}`);
-    } catch (error) {
-      this.socketService.emitToClient(
-        client.id,
-        RoomEvent.ERROR,
-        (error as Error).message,
-      );
-    }
+    this.logger.log(`Player ${data.playerId} left room ${data.roomId}`);
   }
 }

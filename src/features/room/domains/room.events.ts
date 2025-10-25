@@ -17,7 +17,7 @@ export interface RoomEvents {
   [RoomEvent.LEFT]: (payload: { room: RoomDto; playerId: string }) => void;
   [RoomEvent.STARTED]: (room: RoomDto) => void;
   [RoomEvent.ENDED]: (payload: { room: RoomDto }) => void;
-  [RoomEvent.DELETED]: (payload: { room: RoomDto; playerId: string }) => void;
+  [RoomEvent.DELETED]: (payload: { room: RoomDto }) => void;
   [RoomEvent.ERROR]: (message: string) => void;
 
   [key: string]: (...args: any[]) => void;

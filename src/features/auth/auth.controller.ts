@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Res, Req } from '@nestjs/common';
+import { Body, Controller, Post, Res, Req, HttpCode } from '@nestjs/common';
 import type { Response, Request } from 'express';
 import { AuthService } from './auth.service';
 import { AuthSessionManagerService } from '../../common/session/authSessionManager.service';
@@ -40,6 +40,7 @@ export class AuthController {
   }
 
   @Post('login')
+  @HttpCode(200)
   @ApiOperation({ summary: 'Login a user' })
   @ApiResponse({
     status: 200,
@@ -61,6 +62,7 @@ export class AuthController {
   }
 
   @Post('logout')
+  @HttpCode(200)
   @ApiOperation({ summary: 'Logout the current user' })
   async logout(@Res({ passthrough: true }) res: Response, @Req() req: Request) {
     const sessionId = req.cookies[Env.getString('AUTH_SESSION_COOKIE_NAME')] as

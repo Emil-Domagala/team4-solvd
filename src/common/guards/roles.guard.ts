@@ -25,7 +25,8 @@ export class RolesGuard implements CanActivate {
 
     if (!user) throw new UnauthorizedException('No user found in request');
     if (!user.role) throw new ForbiddenException('User has no role assigned');
-    if (user.role.priority > minRolePriority) throw new ForbiddenException('Insufficient role privileges');
+    if (user.role.priority > minRolePriority)
+      throw new ForbiddenException('Insufficient role privileges');
 
     return true;
   }

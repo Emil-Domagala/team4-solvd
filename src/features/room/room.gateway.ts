@@ -95,4 +95,74 @@ export class RoomGateway extends BaseGateway {
       );
     }
   }
+
+  // room.gateway.ts
+  @SubscribeMessage('team:join')
+  async handleJoinTeam(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { roomId: string; teamId: string; playerId: string },
+  ) {
+    try {
+      await this.roomService.joinTeam(data.roomId, data.teamId, data.playerId);
+      await client.join(`${data.roomId}:${data.teamId}`);
+      this.logger.log(`Player ${data.playerId} joined ${data.teamId}`);
+    } catch (error) {
+      this.socketService.emitToClient(
+        client.id,
+        'team:error',
+        (error as Error).message,
+      );
+    }
+  }
+
+  @SubscribeMessage('team:message')
+  async handleTeamMessage(
+    @ConnectedSocket() client: Socket,
+    @MessageBody()
+    data: {
+      roomId: string;
+      teamId: string;
+      playerId: string;
+      username: string;
+      text: string;
+    },
+  ) {
+    try {
+      await this.roomService.sendTeamMessage(data.roomId, data.teamId, {
+        playerId: data.playerId,
+        username: data.username,
+        text: data.text,
+      });
+
+      this.logger.debug(
+        `Team message [${data.teamId}] in room ${data.roomId}: ${data.text}`,
+      );
+    } catch (error) {
+      this.socketService.emitToClient(
+        client.id,
+        'team:error',
+        (error as Error).message,
+      );
+    }
+  }
+
+  @SubscribeMessage('team:history')
+  async handleTeamHistory(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { roomId: string; teamId: string },
+  ) {
+    try {
+      const history = await this.roomService.getTeamChat(
+        data.roomId,
+        data.teamId,
+      );
+      this.socketService.emitToClient(client.id, 'team:history', history);
+    } catch (error) {
+      this.socketService.emitToClient(
+        client.id,
+        'team:error',
+        (error as Error).message,
+      );
+    }
+  }
 }

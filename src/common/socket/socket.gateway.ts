@@ -3,7 +3,6 @@ import {
   WebSocketServer,
   OnGatewayConnection,
   OnGatewayDisconnect,
-  OnGatewayInit,
   SubscribeMessage,
   MessageBody,
   ConnectedSocket,
@@ -18,19 +17,13 @@ import { Env } from '../utils/env.util';
     origin: Env.getString('FRONTEND_DOMAIN'),
   },
 })
-export class SocketGateway
-  implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit
-{
+export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private readonly logger = new Logger(SocketGateway.name);
 
   @WebSocketServer()
   server: Server;
 
   constructor(private readonly socketService: SocketService) {}
-
-  afterInit() {
-    this.socketService.setServer(this.server);
-  }
 
   handleConnection(client: Socket) {
     this.socketService.addClient(client);
@@ -42,12 +35,53 @@ export class SocketGateway
     this.logger.log(`Client disconnected: ${client.id}`);
   }
 
-  @SubscribeMessage('message')
-  handleMessage(
+  @SubscribeMessage('joinRoom')
+  handleJoinRoom(
     @ConnectedSocket() client: Socket,
-    @MessageBody() payload: { text: string },
+    @MessageBody() data: { room: string },
   ) {
-    this.logger.debug(`Received message from ${client.id}:`, payload);
-    this.server.emit('message', { from: client.id, text: payload.text });
+    client.join(data.room);
+    this.logger.log(`${client.id} joined room ${data.room}`);
+    this.server.to(data.room).emit('system', {
+      text: `${client.id} joined room ${data.room}`,
+    });
+  }
+
+  @SubscribeMessage('leaveRoom')
+  handleLeaveRoom(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { room: string },
+  ) {
+    client.leave(data.room);
+    this.logger.log(`${client.id} left room ${data.room}`);
+    this.server.to(data.room).emit('system', {
+      text: `${client.id} left room ${data.room}`,
+    });
+  }
+
+  @SubscribeMessage('sendMessage')
+  handleSendMessage(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { room?: string; text?: string },
+  ) {
+    if (!data?.room || !data?.text) {
+      this.logger.warn(`Invalid message from ${client.id}:`, data);
+      return;
+    }
+
+    // tylko jeśli klient rzeczywiście jest w tym pokoju
+    if (!client.rooms.has(data.room)) {
+      this.logger.warn(
+        `Client ${client.id} tried to send message to room ${data.room} without joining it.`,
+      );
+      return;
+    }
+
+    this.logger.log(`Message from ${client.id} to ${data.room}: ${data.text}`);
+    this.server.to(data.room).emit('message', {
+      from: client.id,
+      text: data.text,
+      room: data.room,
+    });
   }
 }

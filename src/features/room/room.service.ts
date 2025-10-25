@@ -112,4 +112,100 @@ export class RoomService {
     }
     return dtos;
   }
+
+  async joinTeam(roomId: string, teamId: string, playerId: string) {
+    const room = await this.redis.getRoom(roomId);
+    if (!room) throw new EntityNotFoundError('Room');
+
+    if (!room.getPlayerIds().includes(playerId)) {
+      throw new Error('Player must join the room first');
+    }
+
+    if (!room.getTeamIds().includes(teamId)) {
+      room.addTeam(teamId);
+    }
+
+    await this.redis.saveRoom(room);
+    const dto = this.toDto(room);
+
+    await this.redis.saveSystemMessage(
+      roomId,
+      teamId,
+      `Player ${playerId} joined the team.`,
+    );
+
+    this.socketService.emitToRoom(`${roomId}:${teamId}`, 'team:message', {
+      playerId: 'system',
+      username: 'SYSTEM',
+      text: `Player ${playerId} joined the team.`,
+      timestamp: new Date().toISOString(),
+    });
+
+    this.socketService.emitToRoom(roomId, 'team:joined', {
+      room: dto,
+      teamId,
+      playerId,
+    });
+    this.logger.log(
+      `Player ${playerId} joined team ${teamId} in room ${roomId}`,
+    );
+    return dto;
+  }
+
+  async leaveTeam(roomId: string, teamId: string, playerId: string) {
+    const room = await this.redis.getRoom(roomId);
+    if (!room) throw new EntityNotFoundError('Room');
+
+    await this.redis.saveSystemMessage(
+      roomId,
+      teamId,
+      `Player ${playerId} left the team.`,
+    );
+
+    this.socketService.emitToRoom(`${roomId}:${teamId}`, 'team:message', {
+      playerId: 'system',
+      username: 'SYSTEM',
+      text: `Player ${playerId} left the team.`,
+      timestamp: new Date().toISOString(),
+    });
+
+    this.socketService.emitToRoom(roomId, 'team:left', {
+      roomId,
+      teamId,
+      playerId,
+    });
+
+    this.logger.log(`Player ${playerId} left team ${teamId} in room ${roomId}`);
+  }
+
+  async sendTeamMessage(
+    roomId: string,
+    teamId: string,
+    message: { playerId: string; username: string; text: string },
+  ) {
+    const room = await this.redis.getRoom(roomId);
+    if (!room) throw new EntityNotFoundError('Room');
+
+    const chatMessage = {
+      ...message,
+      timestamp: new Date().toISOString(),
+    };
+
+    await this.redis.saveTeamMessage(roomId, teamId, chatMessage);
+    this.socketService.emitToRoom(
+      `${roomId}:${teamId}`,
+      'team:message',
+      chatMessage,
+    );
+
+    this.logger.debug(
+      `Message in team ${teamId} (${roomId}) from ${message.username}: ${message.text}`,
+    );
+
+    return chatMessage;
+  }
+
+  async getTeamChat(roomId: string, teamId: string) {
+    return this.redis.getTeamMessages(roomId, teamId);
+  }
 }

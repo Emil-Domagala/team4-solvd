@@ -122,4 +122,3 @@ export class SocketService<
       .emit(event, ...(args as any));
   }
 }
-

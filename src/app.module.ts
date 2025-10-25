@@ -8,6 +8,7 @@ import { UserModule } from './features/user/user.module';
 import { WordModule } from './features/word/word.module';
 import { CommonModule } from './common/common.module';
 import { RoomModule } from './features/room/room.module';
+import { SocketModule } from './common/socket/socket.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { RoomModule } from './features/room/room.module';
     UserModule,
     WordModule,
     RoomModule,
+    SocketModule,
   ],
   controllers: [],
   providers: [],

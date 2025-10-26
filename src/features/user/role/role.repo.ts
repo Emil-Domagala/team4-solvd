@@ -2,19 +2,20 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { RoleEntity } from './role.entity';
+import { RoleEnum } from './role.enum';
 
 @Injectable()
 export class RoleRepository {
   constructor(
     @InjectRepository(RoleEntity)
-    private readonly repo: Repository<RoleEntity>
+    private readonly repo: Repository<RoleEntity>,
   ) {}
 
   async findAll(): Promise<RoleEntity[]> {
     return this.repo.find();
   }
 
-  async findByName(name: string): Promise<RoleEntity | null> {
+  async findByName(name: RoleEnum): Promise<RoleEntity | null> {
     return this.repo.findOne({ where: { name } });
   }
 
@@ -22,8 +23,8 @@ export class RoleRepository {
     const count = await this.repo.count();
     if (count > 0) return;
 
-    const admin = this.repo.create({ name: 'Admin', priority: 0 });
-    const user = this.repo.create({ name: 'User', priority: 10 });
+    const admin = this.repo.create({ name: RoleEnum.ADMIN, priority: 0 });
+    const user = this.repo.create({ name: RoleEnum.USER, priority: 10 });
     await this.repo.save([admin, user]);
   }
 }

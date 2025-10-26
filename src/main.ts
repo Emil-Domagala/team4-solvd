@@ -11,15 +11,11 @@ import { AppModule } from './app.module';
 import { Env } from './common/utils/env.util';
 import cookieParser from 'cookie-parser';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { CustomExceptionFilter } from './common/filters/customException.filter';
-import { CustomWsExceptionFilter } from './common/filters/CustomWsException.filter';
+import { GlobalExceptionManagerFilter } from './common/filters/globalExceptionManager.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.useGlobalFilters(
-    new CustomExceptionFilter(),
-    new CustomWsExceptionFilter(),
-  );
+  app.useGlobalFilters(new GlobalExceptionManagerFilter());
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true, // remove extra fields

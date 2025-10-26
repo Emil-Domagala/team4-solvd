@@ -19,13 +19,13 @@ import { AuthGuard } from 'src/common/guards/auth.guard';
 import { PaginationResultDto } from 'src/common/pagination/dto/paginationResult.dto';
 import { WordFilterDto } from '../dto/wordFilter.dto';
 import { RolesGuard } from 'src/common/guards/roles.guard';
-import { RoleEnum } from 'src/features/user/role/role.enum';
+import { RolePriority } from 'src/features/user/role/role.enum';
 import { Roles } from 'src/common/decorators/roles.decorator';
 
 @ApiTags('word-admin')
 @Controller('admin/words')
 @UseGuards(AuthGuard, RolesGuard)
-@Roles(RoleEnum.ADMIN)
+@Roles(RolePriority.ADMIN)
 export class WordAdminController {
   constructor(private readonly wordService: WordAdminService) {}
 

@@ -5,6 +5,7 @@ import { UserEntity } from './user.entity';
 import { PasswordService } from 'src/common/utils/password.service';
 import { CreateUserDto } from './dto/createUser.dto';
 import { EntityNotFoundError } from 'src/common/errors/entityNotFound.error';
+import { RoleEntity } from './role/role.entity';
 
 @Injectable()
 export class UserRepository {
@@ -14,9 +15,10 @@ export class UserRepository {
     private passwordService: PasswordService,
   ) {}
 
-  async createUser(dto: CreateUserDto): Promise<UserEntity> {
-    const user = this.repo.create(dto);
+  async createUser(dto: CreateUserDto, role: RoleEntity): Promise<UserEntity> {
+    const user = this.repo.create({ ...dto, role: role });
     user.password = await this.passwordService.toHash(user.password);
+
     return this.repo.save(user);
   }
 

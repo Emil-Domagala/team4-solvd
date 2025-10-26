@@ -40,4 +40,14 @@ export class WordUserController {
     );
     return new WordResponseDto(word);
   }
+
+  @Get('get-similarity')
+  @ApiOperation({ summary: 'Get a similarity measure between two words' })
+  @ApiResponse({ status: 200, type: Number })
+  getSimilarity(
+    @Body('word') word: string,
+    @Body('guess') guess: string,
+  ): Number {
+    return this.wordUserService.getSimilarity(word, guess);
+  }
 }

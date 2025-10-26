@@ -1,26 +1,22 @@
 import {
-  IsUUID,
   IsInt,
   Min,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CreateScoreDto {
-  @IsUUID()
-  readonly playerId: string;
-
+export class UpdateScoreUserDto {
   @ApiProperty({ description: 'Wins', minimum: 0 })
   @IsInt()
   @Min(0)
-  readonly wins: number;
+  wins?: number;
 
   @ApiProperty({ description: 'Losses', minimum: 0 })
   @IsInt()
   @Min(0)
-  readonly losses: number;
+  losses?: number;
 
   @ApiProperty({ description: 'Draws', minimum: 0 })
   @IsInt()
   @Min(0)
-  readonly draws: number;
+  draws?: number;
 }

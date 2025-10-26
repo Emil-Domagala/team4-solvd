@@ -1,10 +1,18 @@
 import {
   IsInt,
+  IsString,
   Min,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { ScoreTeamEntity } from '../scoreTeam.entity';
 
-export class UpdateScoreDto {
+export class UpdateScoreTeamDto {
+  @IsString()
+  readonly teamId: string;
+
+  @IsString()
+  readonly roomId: string;
+
   @ApiProperty({ description: 'Wins', minimum: 0 })
   @IsInt()
   @Min(0)
@@ -19,4 +27,8 @@ export class UpdateScoreDto {
   @IsInt()
   @Min(0)
   draws?: number;
+
+  constructor(partial: Partial<ScoreTeamEntity>) {
+    Object.assign(this, partial);
+  }
 }

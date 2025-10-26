@@ -1,7 +1,6 @@
 import {
   Controller,
   Get,
-  Post,
   Patch,
   Delete,
   Body,
@@ -10,63 +9,63 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { ScoreResponseDto } from './dto/response/scoreResponse.dto';
-import { ScoreService } from './score.service';
+import { ScoreUserResponseDto } from './dto/response/scoreUserResponse.dto';
+import { ScoreUserService } from './scoreUser.service';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
-import { RoleEnum } from '../user/role/role.enum';
-import { UpdateScoreDto } from './dto/updateScore.dto';
+import { RoleEnum } from '../../user/role/role.enum';
+import { UpdateScoreUserDto } from './dto/updateScoreUser.dto';
 
-@ApiTags('score')
-@Controller('score')
-export class ScoreController {
-  constructor(private readonly scoreService: ScoreService) {}
+@ApiTags('user score')
+@Controller('score/user')
+export class ScoreUserController {
+  constructor(private readonly scoreService: ScoreUserService) {}
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a score by user id' })
   @ApiResponse({
     status: 200,
-    type: ScoreResponseDto,
+    type: ScoreUserResponseDto,
     description: 'Returns the score with the specified user id',
   })
   async findById(
     @Param('id', ParseUUIDPipe) id: string,
-  ): Promise<ScoreResponseDto> {
-    const score = await this.scoreService.findOneByUserId(id);
-    return new ScoreResponseDto(score);
+  ): Promise<ScoreUserResponseDto> {
+    const score = await this.scoreService.getScoreByUserId(id);
+    return new ScoreUserResponseDto(score);
   }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update score by user id' })
   @ApiResponse({
     status: 200,
-    type: ScoreResponseDto,
+    type: ScoreUserResponseDto,
     description: 'Score successfully updated'
   })
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN)
   async update(
     @Param('id', ParseUUIDPipe) id: string,
-    @Body() dto: UpdateScoreDto,
-  ): Promise<ScoreResponseDto> {
-    const updated = await this.scoreService.updateOneByUserId(id, dto);
-    return new ScoreResponseDto(updated);
+    @Body() dto: UpdateScoreUserDto,
+  ): Promise<ScoreUserResponseDto> {
+    const updated = await this.scoreService.updateScoreByUserId(id, dto);
+    return new ScoreUserResponseDto(updated);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a score by user id' })
   @ApiResponse({
     status: 200,
-    type: ScoreResponseDto,
+    type: ScoreUserResponseDto,
     description: 'Score successfully deleted'
   })
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN)
   async remove(
     @Param('id', ParseUUIDPipe) id: string
-  ): Promise<ScoreResponseDto | null> {
-    const removed = await this.scoreService.removeOneByUserId(id);
-    return removed ? new ScoreResponseDto(removed) : null;
+  ): Promise<ScoreUserResponseDto | null> {
+    const removed = await this.scoreService.removeScoreByUserId(id);
+    return removed ? new ScoreUserResponseDto(removed) : null;
   }
 }

@@ -1,9 +1,9 @@
 import { Exclude, Expose } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { ScoreEntity } from '../../score.entity';
+import { ScoreTeamEntity } from '../../scoreTeam.entity';
 
 @Exclude()
-export class ScoreResponseDto {
+export class ScoreTeamResponseDto {
   @Expose()
   @ApiProperty()
   readonly id: string;
@@ -22,7 +22,11 @@ export class ScoreResponseDto {
 
   @Expose()
   @ApiProperty()
-  readonly playerId: string;
+  readonly teamId: string;
+  
+  @Expose()
+  @ApiProperty()
+  readonly roomId: string;
 
   @Expose()
   @ApiProperty()
@@ -32,7 +36,7 @@ export class ScoreResponseDto {
   @ApiProperty()
   readonly updatedAt: Date;
 
-  constructor(partial: Partial<ScoreEntity>) {
+  constructor(partial: Partial<ScoreTeamEntity>) {
     Object.assign(this, partial);
   }
 }

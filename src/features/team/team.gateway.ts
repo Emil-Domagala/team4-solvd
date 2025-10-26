@@ -66,7 +66,7 @@ export class TeamGateway extends BaseGateway {
 
       const sys = await this.teamService.systemMessage(
         teamId,
-        `${userName} dołączył/-a do czatu`,
+        `${userName} joined the chat`,
       );
       this.socketService.emitToRoom(
         this.roomName(teamId),
@@ -93,7 +93,7 @@ export class TeamGateway extends BaseGateway {
 
       const sys = await this.teamService.systemMessage(
         teamId,
-        `${userName} opuścił/-a czat`,
+        `${userName} left the chat`,
       );
       this.socketService.emitToRoom(
         this.roomName(teamId),
@@ -149,7 +149,7 @@ export class TeamGateway extends BaseGateway {
     if (ctx) {
       const { teamId, userName } = ctx;
       this.teamService
-        .systemMessage(teamId, `${userName} rozłączył/-a się`)
+        .systemMessage(teamId, `${userName} disconnected`)
         .then((sys) =>
           this.socketService.emitToRoom(
             this.roomName(teamId),

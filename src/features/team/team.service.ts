@@ -1,55 +1,89 @@
+// features/team/team.service.ts
 import { Injectable, Logger } from '@nestjs/common';
-import { RedisService } from 'src/common/utils/redis.service';
+import { v4 as uuidv4 } from 'uuid';
+import { TeamRedisService } from './teamRedis.service';
+import {
+  TeamMessageEntity,
+  TeamMessageType,
+} from './domains/entities/teamMessage.entity';
+import { plainToInstance } from 'class-transformer';
+import { validateOrReject } from 'class-validator';
+import { JoinPayload, MessagePayload } from './team.gateway';
+import { TeamMapper } from './domains/team.mapper';
 import { TeamMessageDto } from './domains/dto/teamMessage.dto';
 
 @Injectable()
 export class TeamService {
   private readonly logger = new Logger(TeamService.name);
 
-  private readonly CHAT_PREFIX = 'team:chat:';
-  private readonly MAX_MESSAGES = 500;
+  constructor(private readonly redis: TeamRedisService) {}
 
-  constructor(private readonly redis: RedisService) {}
+  async onClientJoined(socketId: string, payload: JoinPayload): Promise<void> {
+    const { teamId, userId, userName } = payload;
 
-  private key(teamId: string) {
-    return `${this.CHAT_PREFIX}${teamId}`;
-  }
-
-  async appendMessage(msg: TeamMessageDto): Promise<void> {
-    const client = this.redis.getClient();
-    const payload = JSON.stringify(msg);
-    await client
-      .multi()
-      .rpush(this.key(msg.teamId), payload)
-      .ltrim(this.key(msg.teamId), Math.max(0, -this.MAX_MESSAGES), -1)
-      .exec();
-  }
-
-  async getHistory(teamId: string, last = 50): Promise<TeamMessageDto[]> {
-    const client = this.redis.getClient();
-    const raw = await client.lrange(this.key(teamId), -last, -1);
-    const parsed = raw
-      .map((x) => {
-        try {
-          return JSON.parse(x) as TeamMessageDto;
-        } catch {
-          return null;
-        }
-      })
-      .filter((x): x is TeamMessageDto => !!x);
-    return parsed;
-  }
-
-  async systemMessage(teamId: string, text: string): Promise<TeamMessageDto> {
-    const msg: TeamMessageDto = {
+    const message = plainToInstance(TeamMessageEntity, {
+      id: uuidv4(),
       teamId,
-      type: 'system',
-      senderId: 'system',
-      senderName: 'System',
+      type: TeamMessageType.SYSTEM,
+      senderId: userId,
+      senderName: userName,
+      text: `${userName} joined the team.`,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    await validateOrReject(message);
+    await this.redis.appendMessage(teamId, message);
+    this.logger.debug(`[JOIN] ${userName} (${socketId}) joined ${teamId}`);
+  }
+
+  async onMessage(socketId: string, payload: MessagePayload): Promise<void> {
+    const { teamId, senderId, senderName, text } = payload;
+
+    const message = plainToInstance(TeamMessageEntity, {
+      id: uuidv4(),
+      teamId,
+      type: TeamMessageType.MESSAGE,
+      senderId,
+      senderName,
       text,
-      timestamp: Date.now(),
-    };
-    await this.appendMessage(msg);
-    return msg;
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    await validateOrReject(message);
+    await this.redis.appendMessage(teamId, message);
+
+    this.logger.debug(`[MSG] ${senderName}: ${text}`);
+  }
+
+  async onClientLeft(
+    socketId: string,
+    payload: { teamId: string; userId?: string; userName?: string },
+  ): Promise<void> {
+    const { teamId, userId = 'unknown', userName = 'unknown' } = payload;
+
+    const message = plainToInstance(TeamMessageEntity, {
+      id: uuidv4(),
+      teamId,
+      type: TeamMessageType.SYSTEM,
+      senderId: userId,
+      senderName: userName,
+      text: `${userName} left the team.`,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    await validateOrReject(message);
+    await this.redis.appendMessage(teamId, message);
+
+    this.logger.debug(`[LEAVE] ${userName} (${socketId}) left ${teamId}`);
+  }
+
+  async getHistory(teamId: string): Promise<TeamMessageDto[]> {
+    const team = await this.redis.getTeam(teamId);
+    if (!team) return [];
+    const last50 = team.messages.slice(-50);
+    return last50.map(TeamMapper.toMessageDto);
   }
 }

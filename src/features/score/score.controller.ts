@@ -1,7 +1,6 @@
 import {
   Controller,
   Get,
-  Post,
   Patch,
   Delete,
   Body,
@@ -15,7 +14,7 @@ import { ScoreService } from './score.service';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
-import { RoleEnum } from '../user/role/role.enum';
+import { RolePriority } from '../user/role/role.enum';
 import { UpdateScoreDto } from './dto/updateScore.dto';
 
 @ApiTags('score')
@@ -42,10 +41,10 @@ export class ScoreController {
   @ApiResponse({
     status: 200,
     type: ScoreResponseDto,
-    description: 'Score successfully updated'
+    description: 'Score successfully updated',
   })
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles(RoleEnum.ADMIN)
+  @Roles(RolePriority.ADMIN)
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateScoreDto,
@@ -59,12 +58,12 @@ export class ScoreController {
   @ApiResponse({
     status: 200,
     type: ScoreResponseDto,
-    description: 'Score successfully deleted'
+    description: 'Score successfully deleted',
   })
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles(RoleEnum.ADMIN)
+  @Roles(RolePriority.ADMIN)
   async remove(
-    @Param('id', ParseUUIDPipe) id: string
+    @Param('id', ParseUUIDPipe) id: string,
   ): Promise<ScoreResponseDto | null> {
     const removed = await this.scoreService.removeOneByUserId(id);
     return removed ? new ScoreResponseDto(removed) : null;

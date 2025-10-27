@@ -24,7 +24,7 @@ export class UserEntity {
   @Column({ type: 'varchar', length: 255 })
   password: string;
 
-  @ManyToOne(() => RoleEntity, role => role.users, { eager: true })
+  @ManyToOne(() => RoleEntity, { eager: true })
   role: RoleEntity;
 
   @CreateDateColumn()

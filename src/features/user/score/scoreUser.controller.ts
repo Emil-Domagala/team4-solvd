@@ -14,8 +14,8 @@ import { ScoreUserService } from './scoreUser.service';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
-import { RoleEnum } from '../../user/role/role.enum';
 import { UpdateScoreUserDto } from './dto/updateScoreUser.dto';
+import { RolePriority } from '../role/role.enum';
 
 @ApiTags('user score')
 @Controller('score/user')
@@ -44,7 +44,7 @@ export class ScoreUserController {
     description: 'Score successfully updated'
   })
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles(RoleEnum.ADMIN)
+  @Roles(RolePriority.ADMIN)
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateScoreUserDto,
@@ -61,7 +61,7 @@ export class ScoreUserController {
     description: 'Score successfully deleted'
   })
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles(RoleEnum.ADMIN)
+  @Roles(RolePriority.ADMIN)
   async remove(
     @Param('id', ParseUUIDPipe) id: string
   ): Promise<ScoreUserResponseDto | null> {

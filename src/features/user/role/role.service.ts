@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { RoleRepository } from './role.repo';
 import { RoleEntity } from './role.entity';
+import { RoleEnum } from './role.enum';
 
 @Injectable()
 export class RoleService {
@@ -10,7 +11,7 @@ export class RoleService {
     return this.roleRepo.findAll();
   }
 
-  async findByName(name: string): Promise<RoleEntity | null> {
+  async findByName(name: RoleEnum): Promise<RoleEntity | null> {
     return this.roleRepo.findByName(name);
   }
 

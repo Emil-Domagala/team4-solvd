@@ -1,21 +1,16 @@
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import {
-  Controller,
-  Get,
-  Body,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Body, UseGuards } from '@nestjs/common';
 import { WordUserService } from './word.user.service';
 import { WordResponseDto } from '../dto/response/wordResponse.dto';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { RolesGuard } from 'src/common/guards/roles.guard';
-import { RoleEnum } from 'src/features/user/role/role.enum';
+import { RolePriority } from 'src/features/user/role/role.enum';
 import { Roles } from 'src/common/decorators/roles.decorator';
 
 @ApiTags('word-user')
 @Controller('words')
 @UseGuards(AuthGuard, RolesGuard)
-@Roles(RoleEnum.USER)
+@Roles(RolePriority.USER)
 export class WordUserController {
   constructor(private readonly wordUserService: WordUserService) {}
 

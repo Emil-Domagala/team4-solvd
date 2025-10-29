@@ -29,7 +29,7 @@ export class UserEntity {
   @OneToOne(() => ScoreUserEntity, { eager: true })
   score: ScoreUserEntity;
 
-  @ManyToOne(() => RoleEntity, role => role.users, { eager: true })
+  @ManyToOne(() => RoleEntity, { eager: true })
   role: RoleEntity;
 
   @CreateDateColumn()

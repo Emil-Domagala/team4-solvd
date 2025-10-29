@@ -1,20 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ScoreEntity } from './score.entity';
+import { ScoreUserEntity } from './scoreUser.entity';
 
 @Injectable()
-export class ScoreRepository {
+export class ScoreUserRepository {
   constructor(
-    @InjectRepository(ScoreEntity)
-    private repo: Repository<ScoreEntity>,
+    @InjectRepository(ScoreUserEntity)
+    private repo: Repository<ScoreUserEntity>,
   ) {}
 
   async findByUserId(userId: string) {
     return await this.repo.findOne({ where: { userId } });
   }
 
-  async save(score: ScoreEntity) {
+  async save(score: ScoreUserEntity) {
     return await this.repo.save(score);
   }
 

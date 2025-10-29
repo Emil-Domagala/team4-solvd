@@ -1,13 +1,15 @@
 import {
-  Column,
-  CreateDateColumn,
   Entity,
-  PrimaryGeneratedColumn,
   Unique,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
+  OneToOne,
 } from 'typeorm';
 import { RoleEntity } from './role/role.entity';
+import { ScoreUserEntity } from './score/scoreUser.entity';
 
 @Entity('users')
 @Unique(['email'])
@@ -23,6 +25,9 @@ export class UserEntity {
 
   @Column({ type: 'varchar', length: 255 })
   password: string;
+
+  @OneToOne(() => ScoreUserEntity, { eager: true })
+  score: ScoreUserEntity;
 
   @ManyToOne(() => RoleEntity, { eager: true })
   role: RoleEntity;

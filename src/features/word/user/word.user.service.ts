@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { WordUserRepository } from './word.user.repo';
 import { WordEntity } from '../word.entity';
 import { EntityNotFoundError } from 'src/common/errors/entityNotFound.error';
+import stringSimilarity from 'string-similarity-js';
 
 @Injectable()
 export class WordUserService {
@@ -17,5 +18,10 @@ export class WordUserService {
     const word = await this.wordUserRepo.getRandomWordExcluding(usedWordIds);
     if (!word) throw new EntityNotFoundError('Word');
     return word;
+  }
+
+  getSimilarity(word: string, guess: string): number {
+    const similarity = stringSimilarity(word, guess);
+    return similarity;
   }
 }

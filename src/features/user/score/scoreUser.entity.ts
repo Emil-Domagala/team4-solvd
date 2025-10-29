@@ -1,13 +1,15 @@
+import { UserEntity } from 'src/features/user/user.entity';
 import {
-  Column,
-  CreateDateColumn,
   Entity,
+  Column,
   PrimaryGeneratedColumn,
-  UpdateDateColumn
+  CreateDateColumn,
+  UpdateDateColumn,
+  OneToOne,
 } from 'typeorm';
 
 @Entity('score')
-export class ScoreEntity {
+export class ScoreUserEntity {
   @PrimaryGeneratedColumn('uuid')
   readonly id: string;
 
@@ -22,6 +24,9 @@ export class ScoreEntity {
 
   @Column({ type: 'uuid' })
   readonly userId: string;
+
+  @OneToOne(() => UserEntity, user => user.score)
+  readonly user: UserEntity;
   
   @CreateDateColumn()
   readonly createdAt: Date;

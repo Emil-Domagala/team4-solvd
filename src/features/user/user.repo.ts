@@ -2,8 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserEntity } from './user.entity';
-import { PasswordService } from 'src/common/utils/password.service';
+import { ScoreUserEntity } from './score/scoreUser.entity';
 import { CreateUserDto } from './dto/createUser.dto';
+import { PasswordService } from 'src/common/utils/password.service';
 import { EntityNotFoundError } from 'src/common/errors/entityNotFound.error';
 import { RoleEntity } from './role/role.entity';
 
@@ -16,7 +17,7 @@ export class UserRepository {
   ) {}
 
   async createUser(dto: CreateUserDto, role: RoleEntity): Promise<UserEntity> {
-    const user = this.repo.create({ ...dto, role: role });
+    const user = this.repo.create({ ...dto, role: role, score: new ScoreUserEntity() });
     user.password = await this.passwordService.toHash(user.password);
 
     return this.repo.save(user);

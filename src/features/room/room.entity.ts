@@ -207,8 +207,14 @@ export class RoomEntity {
   static fromJSON(json: Record<string, any>): RoomEntity {
     const instance = plainToInstance(RoomEntity, {
       ...json,
-      createdAt: new Date(json.createdAt),
-      updatedAt: new Date(json.updatedAt),
+      createdAt:
+        typeof json.createdAt === 'string' || typeof json.createdAt === 'number'
+          ? new Date(json.createdAt)
+          : new Date(),
+      updatedAt:
+        typeof json.updatedAt === 'string' || typeof json.updatedAt === 'number'
+          ? new Date(json.updatedAt)
+          : new Date(),
     });
 
     instance.validate();

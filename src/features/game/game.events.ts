@@ -47,7 +47,7 @@ export interface WordData {
 
 export interface ScoreData {
   gameId: string;
-  scores: Record<string, number>; // teamId -> score
+  scores: Record<string, number>;
 }
 
 export interface GameEvents {

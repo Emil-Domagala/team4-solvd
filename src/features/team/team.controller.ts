@@ -8,6 +8,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
+import type { Request } from 'express';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { TeamService } from './team.service';
 import { CreateTeamDto } from './dto/createTeam.dto';
@@ -17,7 +18,6 @@ import { TeamMessageDto } from './dto/response/teamMessage.dto';
 import { SendTeamMessageDto } from './dto/sendMessage.dto';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { UserDto } from './dto/userId.dto';
-import type { Request } from 'express';
 
 type AuthenticatedRequest = Request & { user: UserDto };
 

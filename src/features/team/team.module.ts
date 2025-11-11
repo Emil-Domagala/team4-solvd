@@ -3,11 +3,11 @@ import { TeamRedisService } from './team.redis.service';
 import { TeamService } from './team.service';
 import { TeamController } from './team.controller';
 import { TeamGateway } from './team.gateway';
-import { TeamWsAuthGuard } from '../../common/guards/ws.guard';
+import { WsAuthGuard } from 'src/common/guards/ws.guard';
 
 @Module({
   controllers: [TeamController],
-  providers: [TeamRedisService, TeamService, TeamGateway, TeamWsAuthGuard],
+  providers: [TeamRedisService, TeamService, TeamGateway, WsAuthGuard],
   exports: [TeamService, TeamRedisService, TeamGateway],
 })
 export class TeamModule {}

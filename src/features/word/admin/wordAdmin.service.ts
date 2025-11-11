@@ -7,7 +7,7 @@ import { PaginationResultDto } from 'src/common/pagination/dto/paginationResult.
 import { PaginationService } from 'src/common/pagination/pagination.service';
 import { plainToInstance } from 'class-transformer';
 import { WordFilterDto } from '../dto/wordFilter.dto';
-import { WordAdminRepository } from './word.admin.repo';
+import { WordAdminRepository } from './wordAdmin.repo';
 
 @Injectable()
 export class WordAdminService {

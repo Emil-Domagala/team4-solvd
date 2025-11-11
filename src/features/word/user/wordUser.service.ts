@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { WordUserRepository } from './word.user.repo';
+import { WordUserRepository } from './wordUser.repo';
 import { WordEntity } from '../word.entity';
 import { EntityNotFoundError } from 'src/common/errors/entityNotFound.error';
 import stringSimilarity from 'string-similarity-js';

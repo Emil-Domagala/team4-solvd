@@ -30,7 +30,11 @@ export class WordEntity {
   @Column({ unique: true, type: 'varchar', length: 255 })
   value: string;
 
-  @Column({ type: 'enum', enum: WordCategory, default: WordCategory.GENERAL })
+  @Column({
+    type: 'enum',
+    enum: WordCategory,
+    default: WordCategory.GENERAL
+  })
   category: WordCategory;
 
   @Column({

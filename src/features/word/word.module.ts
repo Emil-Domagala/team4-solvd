@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { WordEntity } from './word.entity';
-import { WordAdminController } from './admin/word.admin.controller';
-import { WordUserController } from './user/word.user.controller';
-import { WordAdminService } from './admin/word.admin.service';
-import { WordUserService } from './user/word.user.service';
-import { WordAdminRepository } from './admin/word.admin.repo';
-import { WordUserRepository } from './user/word.user.repo';
+import { WordAdminController } from './admin/wordAdmin.controller';
+import { WordUserController } from './user/wordUser.controller';
+import { WordAdminService } from './admin/wordAdmin.service';
+import { WordUserService } from './user/wordUser.service';
+import { WordAdminRepository } from './admin/wordAdmin.repo';
+import { WordUserRepository } from './user/wordUser.repo';
 
 @Module({
   imports: [TypeOrmModule.forFeature([WordEntity])],

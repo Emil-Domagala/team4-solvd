@@ -4,8 +4,10 @@ import { TeamEntity } from './domains/team.entity';
 import { TeamMessageEntity } from './domains/teamMessage.entity';
 
 @Injectable()
-export class TeamRedisService extends RedisService {
+export class TeamRedisService {
   private readonly logger = new Logger('TeamRedisService');
+
+  constructor(private readonly redis: RedisService) {}
 
   private teamKey(id: string) {
     return `team:${id}`;
@@ -20,7 +22,7 @@ export class TeamRedisService extends RedisService {
   private ttl = 2 * 60 * 60;
 
   async saveTeam(team: TeamEntity) {
-    const client = this.getClient();
+    const client = this.redis.getClient();
     await client.set(
       this.teamKey(team.id),
       JSON.stringify(team.toJSON()),
@@ -32,7 +34,7 @@ export class TeamRedisService extends RedisService {
   }
 
   async getTeam(id: string): Promise<TeamEntity | null> {
-    const json = await this.getClient().get(this.teamKey(id));
+    const json = await this.redis.getClient().get(this.teamKey(id));
     if (!json) return null;
     try {
       return TeamEntity.fromJSON(JSON.parse(json));
@@ -43,13 +45,13 @@ export class TeamRedisService extends RedisService {
   }
 
   async deleteTeam(id: string) {
-    const client = this.getClient();
+    const client = this.redis.getClient();
     await client.srem(this.activeTeamsKey, id);
     await client.del(this.teamKey(id), this.messagesKey(id));
   }
 
   async listTeams(): Promise<TeamEntity[]> {
-    const ids = await this.getClient().smembers(this.activeTeamsKey);
+    const ids = await this.redis.getClient().smembers(this.activeTeamsKey);
     if (!ids.length) return [];
     const teams = await Promise.all(ids.map((id) => this.getTeam(id)));
     return teams.filter((t): t is TeamEntity => Boolean(t));
@@ -58,14 +60,14 @@ export class TeamRedisService extends RedisService {
   async pushMessage(msg: TeamMessageEntity) {
     const key = this.messagesKey(msg.teamId);
     const data = JSON.stringify(msg.toJSON());
-    const client = this.getClient();
+    const client = this.redis.getClient();
     await client.rpush(key, data);
     await client.expire(key, this.ttl);
   }
 
   async getMessages(teamId: string, limit = 50): Promise<TeamMessageEntity[]> {
     const key = this.messagesKey(teamId);
-    const raw = await this.getClient().lrange(key, -limit, -1);
+    const raw = await this.redis.getClient().lrange(key, -limit, -1);
 
     return raw
       .map((jsonStr) => {

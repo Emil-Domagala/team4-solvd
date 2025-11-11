@@ -17,7 +17,11 @@ export class UserRepository {
   ) {}
 
   async createUser(dto: CreateUserDto, role: RoleEntity): Promise<UserEntity> {
-    const user = this.repo.create({ ...dto, role: role, score: new ScoreUserEntity() });
+    const user = this.repo.create({
+      ...dto,
+      role: role,
+      score: new ScoreUserEntity(),
+    });
     user.password = await this.passwordService.toHash(user.password);
 
     return this.repo.save(user);

@@ -3,18 +3,21 @@ import { RedisService } from 'src/common/utils/redis.service';
 import { GameEntity } from './domains/game.entity';
 
 @Injectable()
-export class GameRedisService extends RedisService {
+export class GameRedisService {
   private readonly PREFIX = 'game:';
   private readonly ACTIVE = 'games:active';
   private readonly TTL = 2 * 60 * 60;
   private readonly logger = new Logger(GameRedisService.name);
+
+  constructor(private readonly redis: RedisService) {}
 
   private key(id: string) {
     return `${this.PREFIX}${id}`;
   }
 
   async saveGame(game: GameEntity) {
-    await this.getClient()
+    await this.redis
+      .getClient()
       .multi()
       .set(this.key(game.id), JSON.stringify(game.toJSON()), 'EX', this.TTL)
       .sadd(this.ACTIVE, game.id)
@@ -22,7 +25,7 @@ export class GameRedisService extends RedisService {
   }
 
   async getGame(id: string): Promise<GameEntity | null> {
-    const json = await this.getClient().get(this.key(id));
+    const json = await this.redis.getClient().get(this.key(id));
     if (!json) return null;
     try {
       return GameEntity.fromJSON(JSON.parse(json));
@@ -33,7 +36,8 @@ export class GameRedisService extends RedisService {
   }
 
   async deleteGame(id: string) {
-    await this.getClient()
+    await this.redis
+      .getClient()
       .multi()
       .srem(this.ACTIVE, id)
       .del(this.key(id))
@@ -41,7 +45,7 @@ export class GameRedisService extends RedisService {
   }
 
   async getAllGames(): Promise<GameEntity[]> {
-    const ids = await this.getClient().smembers(this.ACTIVE);
+    const ids = await this.redis.getClient().smembers(this.ACTIVE);
     const games = await Promise.all(ids.map((i) => this.getGame(i)));
     return games.filter((g): g is GameEntity => !!g);
   }

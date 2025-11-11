@@ -3,9 +3,11 @@ import { RedisService } from 'src/common/utils/redis.service';
 import { ScoreTeamEntity } from './scoreTeam.entity';
 
 @Injectable()
-export class ScoreTeamRedisService extends RedisService {
+export class ScoreTeamRedisService {
   private readonly SCORE_PREFIX = 'score-team:';
   private readonly DEFAULT_TTL = 2 * 60 * 60;
+
+  constructor(private readonly redis: RedisService) {}
 
   private getKey(roomId: string, teamId: string): string {
     return `${this.SCORE_PREFIX}${roomId}:${teamId}`;
@@ -17,7 +19,7 @@ export class ScoreTeamRedisService extends RedisService {
     ttl = this.DEFAULT_TTL,
   ): Promise<void> {
     const key = this.getKey(roomId, score.getTeamId());
-    const client = this.getClient();
+    const client = this.redis.getClient();
 
     await client.set(key, JSON.stringify(score.toJSON()), 'EX', ttl);
   }
@@ -27,7 +29,7 @@ export class ScoreTeamRedisService extends RedisService {
     teamId: string,
   ): Promise<ScoreTeamEntity | null> {
     const key = this.getKey(roomId, teamId);
-    const json = await this.getClient().get(key);
+    const json = await this.redis.getClient().get(key);
     if (!json) return null;
 
     try {

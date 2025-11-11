@@ -25,10 +25,23 @@ export default tseslint.config(
     },
   },
   {
+    files: [
+      'src/**/*.spec.ts',
+      'src/**/*.test.ts',
+      'test/**/*.spec.ts',
+      'test/**/*.test.ts',
+    ],
+    languageOptions: {
+      parserOptions: {
+        projectService: false, // disable strict project lookup
+      },
+    },
+  },
+  {
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-floating-promises': 'warn',
-      '@typescript-eslint/no-unsafe-argument': 'warn'
+      '@typescript-eslint/no-unsafe-argument': 'warn',
     },
   },
 );

@@ -22,12 +22,9 @@ export class ScoreUserEntity {
   @Column({ type: 'int', default: 0 })
   draws: number;
 
-  @Column({ type: 'uuid' })
-  readonly userId: string;
-
-  @OneToOne(() => UserEntity, user => user.score)
+  @OneToOne(() => UserEntity, (user) => user.score)
   readonly user: UserEntity;
-  
+
   @CreateDateColumn()
   readonly createdAt: Date;
 

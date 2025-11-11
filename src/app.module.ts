@@ -1,8 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { CacheModule } from '@nestjs/cache-manager';
-import * as redisStore from '@nestjs/cache-manager';
 import { AuthModule } from './features/auth/auth.module';
 import { UserModule } from './features/user/user.module';
 import { WordModule } from './features/word/word.module';

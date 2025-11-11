@@ -27,8 +27,9 @@ describe('Integration Tests', () => {
     expect(result[0].value).toBe(1);
 
     // Create a user via TypeORM
-    const userRepository = dataSource.getRepository(User);
-    const user = new User();
+    const userRepository = dataSource.getRepository(UserEntity);
+    const user = new UserEntity();
+    user.name = 'John';
     user.email = 'test@example.com';
     user.password = 'hashedPassword123';
 
@@ -50,7 +51,7 @@ describe('Integration Tests', () => {
   });
 
   it('should clear database between tests', async () => {
-    const userRepository = dataSource.getRepository(User);
+    const userRepository = dataSource.getRepository(UserEntity);
 
     // Database should be empty after clearDatabase
     const count = await userRepository.count();

@@ -23,7 +23,7 @@ export class ScoreTeamResponseDto {
   @Expose()
   @ApiProperty()
   readonly teamId: string;
-  
+
   @Expose()
   @ApiProperty()
   readonly roomId: string;

@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { DataSource } from 'typeorm';
 import { RedisService } from '../src/common/utils/redis.service';
+import { ScoreTeamRedisService } from 'src/features/team/score/scoreTeamRedis.service';
 
 // Mock Redis Service that doesn't create any real connections
 class MockRedisService {
@@ -54,6 +55,8 @@ import { UserModule } from '../src/features/user/user.module';
 import { CommonModule } from '../src/common/common.module';
 import { UtilsModule } from '../src/common/utils/utils.module';
 import { WordModule } from 'src/features/word/word.module';
+import { TeamModule } from 'src/features/team/team.module';
+import { ScoreTeamModule } from 'src/features/team/score/scoreTeam.module';
 
 interface Containers {
   postgres?: StartedTestContainer;
@@ -136,10 +139,17 @@ export const createTestApp = async (): Promise<INestApplication> => {
         AuthModule,
         UserModule,
         WordModule,
+        TeamModule,
+        ScoreTeamModule,
       ],
     })
       .overrideProvider(RedisService)
       .useClass(MockRedisService)
+      .overrideProvider(ScoreTeamRedisService)
+      .useValue({
+        getTeamScore: jest.fn().mockResolvedValue(null),
+        saveTeamScore: jest.fn().mockResolvedValue(undefined),
+      })
       .compile();
 
     app = moduleRef.createNestApplication();

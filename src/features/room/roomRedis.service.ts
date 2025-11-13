@@ -3,11 +3,13 @@ import { RedisService } from 'src/common/utils/redis.service';
 import { RoomEntity } from './room.entity';
 
 @Injectable()
-export class RoomRedisService extends RedisService {
+export class RoomRedisService {
   private readonly ROOM_PREFIX = 'room:';
   private readonly ACTIVE_ROOMS_KEY = 'rooms:active';
   private readonly DEFAULT_ROOM_TTL = 2 * 60 * 60;
   private readonly logger = new Logger(RoomRedisService.name);
+
+  constructor(private readonly redis: RedisService) {}
 
   private getRoomKey(id: string) {
     return `${this.ROOM_PREFIX}${id}`;
@@ -17,7 +19,8 @@ export class RoomRedisService extends RedisService {
     const key = this.getRoomKey(room.getId());
     const activeKey = this.ACTIVE_ROOMS_KEY;
 
-    await this.getClient()
+    await this.redis
+      .getClient()
       .multi()
       .set(key, JSON.stringify(room.toJSON()), 'EX', ttl)
       .sadd(activeKey, room.getId())
@@ -26,7 +29,7 @@ export class RoomRedisService extends RedisService {
   }
 
   async getRoom(roomId: string): Promise<RoomEntity | null> {
-    const json = await this.getClient().get(this.getRoomKey(roomId));
+    const json = await this.redis.getClient().get(this.getRoomKey(roomId));
     if (!json) return null;
 
     try {
@@ -39,7 +42,8 @@ export class RoomRedisService extends RedisService {
   }
 
   async deleteRoom(roomId: string) {
-    await this.getClient()
+    await this.redis
+      .getClient()
       .multi()
       .srem(this.ACTIVE_ROOMS_KEY, roomId)
       .del(this.getRoomKey(roomId))
@@ -47,7 +51,9 @@ export class RoomRedisService extends RedisService {
   }
 
   async getAllRooms(): Promise<RoomEntity[]> {
-    const roomIds = await this.getClient().smembers(this.ACTIVE_ROOMS_KEY);
+    const roomIds = await this.redis
+      .getClient()
+      .smembers(this.ACTIVE_ROOMS_KEY);
     if (!roomIds.length) return [];
 
     const rooms = await Promise.all(roomIds.map((id) => this.getRoom(id)));

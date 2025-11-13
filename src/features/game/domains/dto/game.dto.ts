@@ -1,11 +1,12 @@
 import { Exclude, Expose } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { GameStatus } from '../game.status';
+import type { GameStatus } from '../game.status';
 
 @Exclude()
 export class GameDto {
   @Expose() @ApiProperty() id: string;
   @Expose() @ApiProperty() roomId: string;
+  @Expose() @ApiProperty() players: string[];
   @Expose() @ApiProperty() teams: string[];
   @Expose() @ApiProperty() status: GameStatus;
   @Expose() @ApiProperty() currentRound: number;

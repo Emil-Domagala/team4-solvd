@@ -7,6 +7,7 @@ import {
   UpdateDateColumn,
   ManyToOne,
   OneToOne,
+  JoinColumn,
 } from 'typeorm';
 import { RoleEntity } from './role/role.entity';
 import { ScoreUserEntity } from './score/scoreUser.entity';
@@ -27,9 +28,11 @@ export class UserEntity {
   password: string;
 
   @OneToOne(() => ScoreUserEntity, { eager: true })
+  @JoinColumn({ name: 'score_id' })
   score: ScoreUserEntity;
 
   @ManyToOne(() => RoleEntity, { eager: true })
+  @JoinColumn({ name: 'role_id' })
   role: RoleEntity;
 
   @CreateDateColumn()

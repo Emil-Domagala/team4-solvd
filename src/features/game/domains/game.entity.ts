@@ -7,70 +7,54 @@ import {
   Min,
   IsEnum,
   IsDate,
-  ValidateNested,
 } from 'class-validator';
-import { Type } from 'class-transformer';
-import { GameStatus } from './game.status';
-import { RoomConfig } from '../../room/domains/roomConfig.dto';
+import type { GameStatus } from './game.status';
 
 export class GameEntity {
-  @IsUUID()
-  readonly id: string;
+  @IsUUID() readonly id: string;
+  @IsUUID() readonly roomId: string;
 
-  @IsUUID()
-  readonly roomId: string;
+  @IsArray() readonly players: string[];
+  @IsArray() readonly teams: string[];
+  @IsEnum(['idle', 'playing', 'paused', 'ended']) status: GameStatus = 'idle';
 
-  @IsArray()
-  readonly teams: string[];
+  @IsInt() @Min(1) rounds: number;
+  @IsInt() @Min(10) turnDurationInSec: number;
+  @IsInt() @Min(1) wordsPerRound: number;
 
-  @IsEnum(GameStatus)
-  status: GameStatus = GameStatus.IDLE;
+  @IsInt() currentRound = 0;
+  @IsInt() currentTurn = 0;
 
-  @ValidateNested()
-  @Type(() => RoomConfig)
-  config: RoomConfig;
+  @IsUUID() currentTeamId!: string;
+  @IsUUID() currentPlayerId!: string;
 
-  @IsInt()
-  @Min(0)
-  currentRound = 0;
-
-  @IsInt()
-  @Min(0)
-  currentTurn = 0;
-
-  @IsUUID()
-  currentTeamId!: string;
-
-  @IsUUID()
-  currentPlayerId!: string;
-
-  @IsArray()
-  usedWordIds: string[] = [];
-
+  @IsArray() usedWordIds: string[] = [];
   scores: Record<string, number> = {};
 
-  @IsDate()
-  createdAt: Date;
-
-  @IsDate()
-  updatedAt: Date;
+  @IsDate() createdAt: Date;
+  @IsDate() updatedAt: Date;
 
   constructor(params: {
     roomId: string;
+    players: readonly string[];
     teams: readonly string[];
-    config: RoomConfig;
+    rounds: number;
+    turnDurationInSec: number;
+    wordsPerRound: number;
   }) {
     this.id = crypto.randomUUID();
     this.roomId = params.roomId;
+    this.players = [...params.players];
     this.teams = [...params.teams];
-    this.config = params.config;
+    this.rounds = params.rounds;
+    this.turnDurationInSec = params.turnDurationInSec;
+    this.wordsPerRound = params.wordsPerRound;
     this.createdAt = new Date();
     this.updatedAt = new Date();
-    this.validate();
   }
 
   start(teamId: string, playerId: string) {
-    this.status = GameStatus.PLAYING;
+    this.status = 'playing';
     this.currentRound = 1;
     this.currentTurn = 1;
     this.currentTeamId = teamId;
@@ -85,12 +69,12 @@ export class GameEntity {
 
   nextRound() {
     this.currentRound++;
-    if (this.currentRound > this.config.rounds) this.status = GameStatus.ENDED;
+    if (this.currentRound > this.rounds) this.status = 'ended';
     this.touch();
   }
 
   end() {
-    this.status = GameStatus.ENDED;
+    this.status = 'ended';
     this.touch();
   }
 
@@ -107,9 +91,12 @@ export class GameEntity {
     return {
       id: this.id,
       roomId: this.roomId,
+      players: this.players,
       teams: this.teams,
       status: this.status,
-      config: this.config,
+      rounds: this.rounds,
+      turnDurationInSec: this.turnDurationInSec,
+      wordsPerRound: this.wordsPerRound,
       currentRound: this.currentRound,
       currentTurn: this.currentTurn,
       currentTeamId: this.currentTeamId,
@@ -124,8 +111,11 @@ export class GameEntity {
   static fromJSON(json: Record<string, unknown>): GameEntity {
     const g = new GameEntity({
       roomId: String(json.roomId),
+      players: Array.isArray(json.players) ? (json.players as string[]) : [],
       teams: Array.isArray(json.teams) ? (json.teams as string[]) : [],
-      config: json.config as RoomConfig,
+      rounds: Number(json.rounds),
+      turnDurationInSec: Number(json.turnDurationInSec),
+      wordsPerRound: Number(json.wordsPerRound),
     });
 
     if (typeof json.createdAt === 'string')

@@ -1,6 +1,1 @@
-export enum GameStatus {
-  IDLE = 'idle',
-  PLAYING = 'playing',
-  PAUSED = 'paused',
-  ENDED = 'ended',
-}
+export type GameStatus = 'idle' | 'playing' | 'paused' | 'ended';

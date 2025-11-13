@@ -11,7 +11,7 @@ import { BaseGateway } from 'src/common/socket/base.gateway';
 import { SocketService } from 'src/common/socket/socket.service';
 import { TeamService } from './team.service';
 import { TeamEvent, TeamEvents } from './domains/team.events';
-import { WsAuthGuard } from '../../common/guards/ws.guard';
+import { WsAuthGuard } from 'src/common/guards/ws.guard';
 import { SendTeamMessageDto } from './dto/sendMessage.dto';
 
 type HandshakeAuth = { userId?: string };

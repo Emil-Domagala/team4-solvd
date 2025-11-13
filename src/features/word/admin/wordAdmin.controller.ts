@@ -11,7 +11,7 @@ import {
   UseGuards,
   Query,
 } from '@nestjs/common';
-import { WordAdminService } from './word.admin.service';
+import { WordAdminService } from './wordAdmin.service';
 import { CreateWordDto } from '../dto/createWord.dto';
 import { UpdateWordDto } from '../dto/updateWord.dto';
 import { WordResponseDto } from '../dto/response/wordResponse.dto';

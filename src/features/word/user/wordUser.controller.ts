@@ -1,6 +1,6 @@
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Controller, Get, Body, UseGuards } from '@nestjs/common';
-import { WordUserService } from './word.user.service';
+import { WordUserService } from './wordUser.service';
 import { WordResponseDto } from '../dto/response/wordResponse.dto';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { RolesGuard } from 'src/common/guards/roles.guard';

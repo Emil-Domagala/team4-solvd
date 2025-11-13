@@ -10,8 +10,16 @@ export class ScoreUserRepository {
     private repo: Repository<ScoreUserEntity>,
   ) {}
 
+  async create(scoreData: Partial<ScoreUserEntity>): Promise<ScoreUserEntity> {
+    const score = this.repo.create(scoreData);
+    return this.repo.save(score);
+  }
+
   async findByUserId(userId: string) {
-    return await this.repo.findOne({ where: { userId } });
+    return await this.repo.findOne({
+      where: { user: { id: userId } },
+      relations: ['user'],
+    });
   }
 
   async save(score: ScoreUserEntity) {

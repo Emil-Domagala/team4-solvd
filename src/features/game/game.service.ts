@@ -28,18 +28,19 @@ export class GameService {
     if (room.getStatus() !== 'waiting') throw new Error('Room is not waiting');
 
     const teams = room.getTeamIds();
+    const players = room.getPlayerIds();
     if (teams.length < 2) throw new Error('Need at least 2 teams');
 
     const config = room.getRoomConfig();
-    const game = new GameEntity({ roomId, teams, config });
-
-    const players = room.getPlayerIds();
-    if (players.length === 0) throw new Error('No players found in the room');
-
-    const firstTeamId = teams[0];
-    const firstPlayerId = players[0];
-
-    game.start(firstTeamId, firstPlayerId);
+    const game = new GameEntity({
+      roomId,
+      players,
+      teams,
+      rounds: config.rounds,
+      turnDurationInSec: config.turnDurationInSec,
+      wordsPerRound: config.wordsPerRound,
+    });
+    game.start(teams[0], players[0]);
 
     await this.redis.saveGame(game);
     const dto = this.toDto(game);

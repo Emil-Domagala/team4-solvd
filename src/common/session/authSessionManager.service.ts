@@ -15,13 +15,15 @@ export type SessionData = {
 };
 
 @Injectable()
-export class AuthSessionManagerService extends RedisService {
+export class AuthSessionManagerService {
   private readonly logger = new Logger(AuthSessionManagerService.name);
   private readonly SESSION_PREFIX = 'session:';
   private readonly DEFAULT_TTL = Env.getOptionalNumber(
     'AUTH_SESSION_TTL_SEC',
     3600,
   );
+
+  constructor(private readonly redis: RedisService) {}
 
   private getSessionKey(sessionId: string) {
     return `${this.SESSION_PREFIX}${sessionId}`;
@@ -40,17 +42,16 @@ export class AuthSessionManagerService extends RedisService {
       sessionCreatedAt: new Date(),
     };
 
-    await this.getClient().set(
-      key,
-      JSON.stringify(value),
-      'EX',
-      ttlSeconds ?? this.DEFAULT_TTL,
-    );
+    await this.redis
+      .getClient()
+      .set(key, JSON.stringify(value), 'EX', ttlSeconds ?? this.DEFAULT_TTL);
     return sessionId;
   }
 
   async getSession(sessionId: string): Promise<SessionData | null> {
-    const json = await this.getClient().get(this.getSessionKey(sessionId));
+    const json = await this.redis
+      .getClient()
+      .get(this.getSessionKey(sessionId));
     if (!json) return null;
 
     try {
@@ -62,7 +63,7 @@ export class AuthSessionManagerService extends RedisService {
   }
 
   async deleteSession(sessionId: string): Promise<void> {
-    await this.getClient().del(this.getSessionKey(sessionId));
+    await this.redis.getClient().del(this.getSessionKey(sessionId));
   }
 
   async extendSession(
@@ -72,12 +73,14 @@ export class AuthSessionManagerService extends RedisService {
     const key = this.getSessionKey(sessionId);
     const session = await this.getSession(sessionId);
     if (session) {
-      await this.getClient().set(
-        key,
-        JSON.stringify(session),
-        'EX',
-        additionalTTL ?? this.DEFAULT_TTL,
-      );
+      await this.redis
+        .getClient()
+        .set(
+          key,
+          JSON.stringify(session),
+          'EX',
+          additionalTTL ?? this.DEFAULT_TTL,
+        );
     }
   }
 

@@ -34,7 +34,6 @@ describe('ScoreTeamService (e2e)', () => {
   });
 
   it('should update team score and emit socket event', async () => {
-    // 1️⃣ Mock Redis z początkowym wynikiem
     const initialScore = new ScoreTeamEntity({
       teamId: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
       roomId: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
@@ -51,7 +50,6 @@ describe('ScoreTeamService (e2e)', () => {
 
     jest.spyOn(socketService, 'emitToRoom').mockImplementation(() => undefined);
 
-    // 2️⃣ Aktualizacja wyniku
     const dto: UpdateScoreTeamDto = {
       teamId: initialScore.teamId,
       roomId: initialScore.roomId,
@@ -62,13 +60,11 @@ describe('ScoreTeamService (e2e)', () => {
 
     const updated = await service.updateTeamScore(dto);
 
-    // 3️⃣ Weryfikacja
     expect(updated).toBeDefined();
     expect(updated.wins).toBe(2);
     expect(updated.losses).toBe(1);
     expect(updated.draws).toBe(1);
 
-    // Redis powinien zapisać nowy wynik
     // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(redis.saveTeamScore).toHaveBeenCalledTimes(1);
     // eslint-disable-next-line @typescript-eslint/unbound-method

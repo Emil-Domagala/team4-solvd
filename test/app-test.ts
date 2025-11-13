@@ -55,8 +55,7 @@ import { UserModule } from '../src/features/user/user.module';
 import { CommonModule } from '../src/common/common.module';
 import { UtilsModule } from '../src/common/utils/utils.module';
 import { WordModule } from 'src/features/word/word.module';
-import { TeamModule } from 'src/features/team/team.module';
-import { ScoreTeamModule } from 'src/features/team/score/scoreTeam.module';
+import { GameModule } from 'src/features/game/game.module';
 
 interface Containers {
   postgres?: StartedTestContainer;
@@ -139,8 +138,7 @@ export const createTestApp = async (): Promise<INestApplication> => {
         AuthModule,
         UserModule,
         WordModule,
-        TeamModule,
-        ScoreTeamModule,
+        GameModule,
       ],
     })
       .overrideProvider(RedisService)

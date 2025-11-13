@@ -1,31 +1,34 @@
 import { plainToInstance } from 'class-transformer';
+
 import {
+  Entity,
   Column,
   CreateDateColumn,
   PrimaryGeneratedColumn,
-  UpdateDateColumn
+  UpdateDateColumn,
 } from 'typeorm';
 import { UpdateScoreTeamDto } from './dto/updateScoreTeam.dto';
 
+@Entity('score_team')
 export class ScoreTeamEntity {
   @PrimaryGeneratedColumn('uuid')
   readonly id: string;
 
   @Column({ type: 'int', default: 0 })
-  private wins: number;
+  wins: number;
 
   @Column({ type: 'int', default: 0 })
-  private losses: number;
+  losses: number;
 
   @Column({ type: 'int', default: 0 })
-  private draws: number;
+  draws: number;
 
   @Column({ type: 'uuid' })
   readonly teamId: string;
 
   @Column({ type: 'uuid' })
   readonly roomId: string;
-  
+
   @CreateDateColumn()
   private readonly createdAt: Date;
 

@@ -35,7 +35,7 @@ export class ScoreTeamRedisService {
     try {
       const data = JSON.parse(json);
       return ScoreTeamEntity.fromJSON(data);
-    } catch (error) {
+    } catch {
       return null;
     }
   }
